@@ -7,11 +7,13 @@ import { useExperienceContext } from "@/components/experience/ExperienceProvider
 import { SceneShell } from "@/components/experience/SceneShell";
 import { OrnamentalCard } from "@/components/ornamental";
 import { useFlowContext } from "@/components/providers/FlowProvider";
+import { useLocale } from "@/components/providers/LocaleProvider";
 import { completeStep } from "@/services/mock/flow.service";
 
 export function AdviceScene() {
   const { refresh } = useFlowContext();
   const { nextStep, prevStep } = useExperienceContext();
+  const { t } = useLocale();
   const formRef = useRef<AdviceFormHandle>(null);
 
   async function handleContinue() {
@@ -27,12 +29,12 @@ export function AdviceScene() {
   return (
     <SceneShell
       step="advice"
-      title="Leave Your Advice"
-      subtitle="Share a message, du'a, or piece of wisdom for the couple. You cannot edit after submitting."
+      title={t("advice.title")}
+      subtitle={t("advice.subtitle")}
       footer={
         <ExperienceNav
           onBack={prevStep}
-          continueLabel="Submit Advice"
+          continueLabel={t("advice.submit")}
           onContinue={handleContinue}
         />
       }

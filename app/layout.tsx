@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { BackgroundLayout } from "@/components/layout/BackgroundLayout";
 import { FlowProvider } from "@/components/providers/FlowProvider";
+import { LocaleProvider } from "@/components/providers/LocaleProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -14,13 +15,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ar" dir="rtl" suppressHydrationWarning>
       <body className="flow-body">
-        <FlowProvider>
-          <BackgroundLayout>
-            <div className="flow-app experience-app">{children}</div>
-          </BackgroundLayout>
-        </FlowProvider>
+        <LocaleProvider>
+          <FlowProvider>
+            <BackgroundLayout>
+              <div className="flow-app experience-app">{children}</div>
+            </BackgroundLayout>
+          </FlowProvider>
+        </LocaleProvider>
       </body>
     </html>
   );

@@ -9,6 +9,7 @@ import {
 import { findGuestByToken } from "@/lib/guest/server";
 import { VIDEOS_BUCKET } from "@/lib/constants/steps";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { randomUUID } from "@/lib/utils/uuid";
 
 /**
  * POST /api/capsule/upload — multipart form field: `video`.
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
       return jsonError("Video already uploaded", 409, "CAPSULE_EXISTS");
     }
 
-    const videoId = crypto.randomUUID();
+    const videoId = randomUUID();
     const extension = file.name.split(".").pop() ?? "webm";
     const storagePath = `${guest.id}/${videoId}.${extension}`;
 

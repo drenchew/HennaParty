@@ -7,6 +7,7 @@ import {
   isVideoLocked,
   validateVideoUpload,
 } from "@/lib/video/validation";
+import { randomUUID } from "@/lib/utils/uuid";
 
 export interface VideoRecord {
   id: string;
@@ -95,7 +96,7 @@ export async function uploadVideoForGuest(
     return toSafeVideo(existing as VideoRecord);
   }
 
-  const videoId = crypto.randomUUID();
+  const videoId = randomUUID();
   const storagePath = buildVideoStoragePath(guest.id, videoId, file.type);
 
   const { error: uploadError } = await supabase.storage

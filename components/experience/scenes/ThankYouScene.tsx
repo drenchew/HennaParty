@@ -8,6 +8,7 @@ import { SceneShell } from "@/components/experience/SceneShell";
 import { OrnamentalCard, OrnamentFrame } from "@/components/ornamental";
 import { ThankYouClosing, ThankYouStats } from "@/components/thank-you";
 import { useFlowContext } from "@/components/providers/FlowProvider";
+import { useLocale } from "@/components/providers/LocaleProvider";
 import { isApiError } from "@/lib/utils/api";
 import { completeStep } from "@/services/mock/flow.service";
 import { getEventStats } from "@/services/guest.service";
@@ -24,6 +25,7 @@ const EMPTY_STATS: EventStats = {
 export function ThankYouScene() {
   const { refresh } = useFlowContext();
   const { goToStep } = useExperienceContext();
+  const { t } = useLocale();
   const reduceMotion = useReducedMotion();
   const [stats, setStats] = useState<EventStats | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +59,7 @@ export function ThankYouScene() {
           transition={reduceMotion ? { duration: 0 } : { delay: 1.2, duration: 0.5 }}
         >
           <ExperienceNav
-            continueLabel="Back to Welcome"
+            continueLabel={t("thankYou.backWelcome")}
             onContinue={() => goToStep("welcome")}
             showBack={false}
           />
@@ -81,11 +83,9 @@ export function ThankYouScene() {
                 : { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
             }
           >
-            <p className="experience-eyebrow">Henna Night</p>
-            <h2 className="experience-title">Thank You</h2>
-            <p className="experience-subtitle">
-              Your love and presence made this night unforgettable.
-            </p>
+            <p className="experience-eyebrow">{t("common.hennaNight")}</p>
+            <h2 className="experience-title">{t("thankYou.title")}</h2>
+            <p className="experience-subtitle">{t("thankYou.subtitle")}</p>
           </motion.header>
         </OrnamentFrame>
 
@@ -100,17 +100,17 @@ export function ThankYouScene() {
             }
           >
             <OrnamentalCard corners>
-              <h3 className="experience-stats-title">Tonight we collected</h3>
+              <h3 className="experience-stats-title">{t("thankYou.statsTitle")}</h3>
               <ThankYouStats stats={stats} />
               {error && (
                 <p className="experience-meta experience-meta--top experience-error">
-                  Could not load live stats right now.
+                  {t("thankYou.statsError")}
                 </p>
               )}
             </OrnamentalCard>
           </motion.div>
         ) : (
-          <p className="experience-loading">Gathering celebration stats…</p>
+          <p className="experience-loading">{t("thankYou.gatheringStats")}</p>
         )}
 
         <ThankYouClosing />

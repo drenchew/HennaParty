@@ -405,7 +405,7 @@
     @apply pointer-events-none fixed inset-0 -z-20;
     background-image:
       linear-gradient(rgba(13, 7, 8, 0.55), rgba(13, 7, 8, 0.55)),
-      url("/backgrounds/henna-mobile.webp"),
+      url("/backgrounds/henna-mobile.png"),
       url("/backgrounds/henna-ornament.svg");
     background-size: cover, cover, cover;
     background-position: center, center, center;
@@ -427,13 +427,81 @@
     background: linear-gradient(to top, rgba(13, 7, 8, 0.9), transparent);
   }
 
-  .henna-bg-vignette {
-    @apply pointer-events-none fixed inset-0 -z-10;
-    background: radial-gradient(ellipse at center, transparent 35%, rgba(13, 7, 8, 0.65) 100%);
-  }
-
   .henna-bg-content {
     @apply relative z-0 min-h-screen;
+  }
+
+  /* ─── Atmospheric layer (above bg image, below UI) ─── */
+  .atmosphere-layer {
+    @apply pointer-events-none fixed inset-0;
+    z-index: -10;
+  }
+
+  .atmosphere-gradient {
+    @apply absolute inset-0;
+    opacity: 0.045;
+    background: linear-gradient(
+      135deg,
+      rgba(250, 243, 235, 0.35) 0%,
+      rgba(216, 181, 106, 0.28) 45%,
+      rgba(255, 252, 245, 0.22) 100%
+    );
+    animation: atmosphere-gradient-shift 48s ease-in-out infinite alternate;
+  }
+
+  .atmosphere-particles {
+    @apply absolute inset-0 h-full w-full;
+    opacity: 0.85;
+    mix-blend-mode: screen;
+  }
+
+  .atmosphere-vignette {
+    @apply absolute inset-0;
+    background: radial-gradient(
+      ellipse at center,
+      transparent 42%,
+      rgba(13, 7, 8, 0.28) 78%,
+      rgba(13, 7, 8, 0.45) 100%
+    );
+  }
+
+  .atmosphere-grain {
+    @apply absolute inset-0 opacity-[0.035];
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 180px 180px;
+    mix-blend-mode: overlay;
+  }
+
+  @keyframes atmosphere-gradient-shift {
+    0% {
+      opacity: 0.035;
+      transform: scale(1) translateY(0);
+    }
+    50% {
+      opacity: 0.055;
+    }
+    100% {
+      opacity: 0.04;
+      transform: scale(1.04) translateY(-1%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .atmosphere-gradient {
+      animation: none;
+      opacity: 0.03;
+    }
+
+    .atmosphere-particles {
+      display: none;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .atmosphere-grain {
+      opacity: 0.028;
+    }
   }
 
   /* ─── Ornamental design system ─── */
@@ -553,7 +621,7 @@
   }
 
   .experience-glass {
-    @apply flex max-h-[92dvh] w-full flex-col gap-4 overflow-y-auto px-3 py-5;
+    @apply relative flex max-h-[92dvh] w-full flex-col gap-4 overflow-y-auto px-3 py-5;
     background: var(--henna-glass);
     border: 1px solid var(--henna-glass-border);
     box-shadow: var(--henna-shadow);
@@ -660,5 +728,21 @@
 
   .experience-steps__item[data-status="complete"] .experience-steps__dot {
     background: var(--henna-accent);
+  }
+
+  .language-toggle {
+    @apply absolute end-3 top-3 z-10 border px-3 py-1.5 text-[11px] font-medium uppercase tracking-wider transition;
+    border-color: color-mix(in srgb, var(--henna-gold) 45%, transparent);
+    color: var(--henna-gold);
+    background: color-mix(in srgb, var(--henna-bg) 55%, transparent);
+    clip-path: polygon(6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px), 0 6px);
+  }
+
+  .language-toggle:hover {
+    box-shadow: 0 0 12px rgba(212, 168, 83, 0.25);
+  }
+
+  [dir="rtl"] .experience-dua-translation {
+    @apply text-right;
   }
 }

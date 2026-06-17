@@ -6,12 +6,14 @@ import { SceneShell } from "@/components/experience/SceneShell";
 import { OrnamentalCard } from "@/components/ornamental";
 import { PhotoUpload } from "@/components/photos/PhotoUpload";
 import { useFlowContext } from "@/components/providers/FlowProvider";
+import { useLocale } from "@/components/providers/LocaleProvider";
 import { MAX_PHOTOS_PER_GUEST } from "@/lib/constants/steps";
 import { completeStep } from "@/services/mock/flow.service";
 
 export function PhotosScene() {
   const { refresh } = useFlowContext();
   const { nextStep, prevStep } = useExperienceContext();
+  const { t } = useLocale();
 
   function handleContinue() {
     completeStep("photos");
@@ -22,12 +24,12 @@ export function PhotosScene() {
   return (
     <SceneShell
       step="photos"
-      title="Share Your Photos"
-      subtitle={`Upload up to ${MAX_PHOTOS_PER_GUEST} photos from tonight.`}
+      title={t("photos.title")}
+      subtitle={t("photos.subtitle", { max: MAX_PHOTOS_PER_GUEST })}
       footer={
         <ExperienceNav
           onBack={prevStep}
-          continueLabel="Continue"
+          continueLabel={t("common.continue")}
           onContinue={handleContinue}
         />
       }

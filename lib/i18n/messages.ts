@@ -1,0 +1,260 @@
+import type { Locale } from "./types";
+
+export interface MessageTree {
+  [key: string]: string | MessageTree;
+}
+
+export const messages: Record<Locale, MessageTree> = {
+  ar: {
+    common: {
+      back: "رجوع",
+      continue: "متابعة",
+      loading: "جاري التحضير…",
+      hennaNight: "ليلة الحناء",
+      switchToEnglish: "English",
+      switchToArabic: "العربية",
+      progress: "التقدّم",
+      tryAgain: "حاول مرة أخرى",
+    },
+    steps: {
+      welcome: "الترحيب",
+      dua: "دعاؤك",
+      video: "كبسولة زمنية",
+      photos: "الصور",
+      advice: "النصيحة",
+      questionnaire: "الاستبيان",
+      complete: "شكراً لك",
+    },
+    welcome: {
+      title: "أهلاً بكم في ليلة الحناء",
+      subtitle:
+        "شكراً لكونكم جزءاً من هذه الاحتفالية. لكل ضيف تجربة فريدة — لنبدأ رحلتكم.",
+      sessionReady:
+        "جلسة ضيف مجهولة جاهزة. لا حاجة لتسجيل الدخول — أنشأنا لكم معرّفاً خاصاً.",
+      session: "الجلسة",
+      begin: "ابدأ الرحلة",
+      starting: "جاري البدء…",
+    },
+    dua: {
+      title: "دعاؤك الفريد",
+      subtitle: "دعاء اختير لكم خصيصاً — نسأل الله أن يبارك للعروسين ولكم.",
+      loading: "جاري تخصيص دعائكم…",
+      exhausted: "تمت مشاركة جميع الأدعية الليلة. شكراً لوجودكم معنا.",
+      loadError: "تعذّر تحميل الدعاء.",
+      accept: "أقبل هذا الدعاء",
+      accepting: "جاري القبول…",
+    },
+    video: {
+      title: "كبسولة فيديو زمنية",
+      subtitle: "سجّلوا أو ارفعوا رسالة قصيرة (60 ثانية كحد أقصى). ستُقفل لمدة سنة.",
+      loading: "جاري التحقق من الكبسولة…",
+      saved: "✓ تم حفظ الكبسولة الزمنية بأمان.",
+      unlocks: "يُفتح في",
+      lockedNote: "لا يمكن مشاهدة الفيديو حتى ذلك الحين — حتى من قبلكم. هذا مقصود.",
+      needVideo: "يرجى تسجيل أو رفع فيديو أولاً.",
+      uploading: "جاري الرفع…",
+      saveContinue: "حفظ ومتابعة",
+    },
+    photos: {
+      title: "شاركوا صوركم",
+      subtitle: "ارفعوا حتى {max} صوراً من هذه الليلة.",
+    },
+    advice: {
+      title: "اتركوا نصيحتكم",
+      subtitle:
+        "شاركوا رسالة أو دعاء أو حكمة للعروسين. لا يمكن التعديل بعد الإرسال.",
+      submit: "إرسال النصيحة",
+    },
+    questionnaire: {
+      title: "استبيان ممتع",
+      subtitle:
+        "صوّتوا على كل سؤال — إجابة واحدة لكل سؤال. شاهدوا كيف صوّت الضيوف الآخرون.",
+      finish: "إلى صفحة الشكر",
+    },
+    thankYou: {
+      title: "شكراً لكم",
+      subtitle: "حبكم وحضوركم جعل هذه الليلة لا تُنسى.",
+      statsTitle: "الليلة جمعنا",
+      backWelcome: "العودة للترحيب",
+      gatheringStats: "جاري جمع إحصائيات الاحتفال…",
+      statsError: "تعذّر تحميل الإحصائيات الآن.",
+      closingTitle: "شكراً لكونكم جزءاً من قصتنا",
+      closingSub:
+        "كل دعاء وصورة ورسالة وتصويت الليلة يصبح جزءاً من ذكرى نعتز بها. بارك الله هذا الزواج بالمحبة والرحمة والبركة.",
+    },
+    stats: {
+      duas: "أدعية وُزّعت",
+      photos: "صور شاركت",
+      messages: "رسائل نصيحة",
+      votes: "أصوات الاستبيان",
+      label: "إحصائيات الاحتفال",
+    },
+    adviceForm: {
+      loading: "جاري تحميل رسالتكم…",
+      placeholder: "إلى العروسين العزيزين…",
+      emptyError: "يرجى كتابة رسالة قبل المتابعة.",
+      submitted: "تم الإرسال — التعديل معطّل",
+      savedOn: "✓ تم حفظ رسالتكم في",
+    },
+    photosUpload: {
+      loading: "جاري تحميل صوركم…",
+      uploaded: "صور مرفوعة",
+      limitReached: " — تم بلوغ الحد",
+      addPhoto: "إضافة صورة",
+      remaining: "متبقية",
+      uploading: "جاري الرفع…",
+      noPhotos: "لا صور بعد — اختياري، يمكنكم المتابعة في أي وقت.",
+      processError: "تعذّر معالجة الصورة. جرّبوا JPEG أو PNG.",
+      removePhoto: "إزالة الصورة",
+      guestPhoto: "صورة الضيف",
+    },
+    videoUpload: {
+      record: "تسجيل بالكاميرا",
+      upload: "أو ارفعوا فيديو (حد أقصى {max} ث)",
+      stop: "إيقاف التسجيل",
+      ready: "✓ جاهز",
+      retake: "إعادة التسجيل / اختيار آخر",
+      invalidDuration: "مدة الفيديو غير صالحة",
+      tooLong: "يجب أن يكون الفيديو {max} ثانية أو أقل",
+      readError: "تعذّر قراءة ملف الفيديو. جرّبوا صيغة أخرى.",
+      cameraError: "تعذّر الوصول للكاميرا. استخدموا رفع ملف.",
+    },
+    questionnaireUi: {
+      loading: "جاري تحميل الاستبيان…",
+      answered: "أسئلة مُجابة",
+      complete: " · مكتمل!",
+      showResults: "عرض النتائج المباشرة",
+      hideResults: "إخفاء النتائج",
+      liveResults: "النتائج المباشرة",
+      votes: "أصوات",
+    },
+  },
+  en: {
+    common: {
+      back: "Back",
+      continue: "Continue",
+      loading: "Preparing your experience…",
+      hennaNight: "Henna Night",
+      switchToEnglish: "English",
+      switchToArabic: "العربية",
+      progress: "Progress",
+      tryAgain: "Try again",
+    },
+    steps: {
+      welcome: "Welcome",
+      dua: "Your Dua",
+      video: "Time Capsule",
+      photos: "Photos",
+      advice: "Advice",
+      questionnaire: "Questionnaire",
+      complete: "Thank You",
+    },
+    welcome: {
+      title: "Welcome to our Henna Night",
+      subtitle:
+        "Thank you for being part of this celebration. Each guest receives a unique experience — let's begin yours.",
+      sessionReady:
+        "Your anonymous session is ready. No login required — we've created a private guest ID just for you.",
+      session: "Session",
+      begin: "Begin the Journey",
+      starting: "Starting…",
+    },
+    dua: {
+      title: "Your Unique Dua",
+      subtitle:
+        "A prayer chosen just for you — may it bring barakah to the couple and to you.",
+      loading: "Assigning your unique dua…",
+      exhausted:
+        "All duas have been shared tonight. Thank you for being part of this celebration.",
+      loadError: "Could not load your dua.",
+      accept: "I accept this dua",
+      accepting: "Accepting…",
+    },
+    video: {
+      title: "Video Time Capsule",
+      subtitle:
+        "Record or upload a short message (max 60 seconds). It will be locked for one year.",
+      loading: "Checking time capsule status…",
+      saved: "✓ Your time capsule has been saved securely.",
+      unlocks: "Unlocks on",
+      lockedNote:
+        "Your video cannot be viewed until then — not even by you. This is by design.",
+      needVideo: "Please record or upload a video first.",
+      uploading: "Uploading…",
+      saveContinue: "Save & Continue",
+    },
+    photos: {
+      title: "Share Your Photos",
+      subtitle: "Upload up to {max} photos from tonight.",
+    },
+    advice: {
+      title: "Leave Your Advice",
+      subtitle:
+        "Share a message, du'a, or piece of wisdom for the couple. You cannot edit after submitting.",
+      submit: "Submit Advice",
+    },
+    questionnaire: {
+      title: "Fun Questionnaire",
+      subtitle:
+        "Vote on each question — one answer per question. See how other guests voted with live results.",
+      finish: "See Thank You",
+    },
+    thankYou: {
+      title: "Thank You",
+      subtitle: "Your love and presence made this night unforgettable.",
+      statsTitle: "Tonight we collected",
+      backWelcome: "Back to Welcome",
+      gatheringStats: "Gathering celebration stats…",
+      statsError: "Could not load live stats right now.",
+      closingTitle: "Thank you for being part of our story",
+      closingSub:
+        "Every dua, photo, message, and vote tonight becomes part of a memory we will cherish forever. May Allah bless this union with love, mercy, and barakah.",
+    },
+    stats: {
+      duas: "Duas received",
+      photos: "Photos shared",
+      messages: "Advice messages",
+      votes: "Questionnaire votes",
+      label: "Celebration statistics",
+    },
+    adviceForm: {
+      loading: "Loading your message…",
+      placeholder: "Dear bride & groom…",
+      emptyError: "Please write a message before continuing.",
+      submitted: " · Submitted — editing is disabled",
+      savedOn: "✓ Your message was saved on",
+    },
+    photosUpload: {
+      loading: "Loading your photos…",
+      uploaded: "photos uploaded",
+      limitReached: " — limit reached",
+      addPhoto: "Add photo",
+      remaining: "remaining",
+      uploading: "Uploading…",
+      noPhotos: "No photos yet — optional, you can continue anytime.",
+      processError: "Could not process that image. Try JPEG or PNG.",
+      removePhoto: "Remove photo",
+      guestPhoto: "Guest photo",
+    },
+    videoUpload: {
+      record: "Record with camera",
+      upload: "Or upload a video (max {max}s)",
+      stop: "Stop recording",
+      ready: "✓ Ready",
+      retake: "Re-record / choose another",
+      invalidDuration: "Invalid video duration",
+      tooLong: "Video must be {max} seconds or less",
+      readError: "Could not read that video file. Try another format.",
+      cameraError: "Could not access camera. Use file upload instead.",
+    },
+    questionnaireUi: {
+      loading: "Loading questionnaire…",
+      answered: "questions answered",
+      complete: " · Complete!",
+      showResults: "Show live results",
+      hideResults: "Hide live results",
+      liveResults: "Live results",
+      votes: "votes",
+    },
+  },
+};

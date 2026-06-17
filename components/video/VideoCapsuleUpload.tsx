@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocale } from "@/components/providers/LocaleProvider";
 import { MAX_VIDEO_DURATION_SECONDS } from "@/lib/constants/steps";
 import {
   formatDuration,
@@ -22,6 +23,7 @@ export function VideoCapsuleUpload({
   onClear,
   disabled,
 }: VideoCapsuleUploadProps) {
+  const { t } = useLocale();
   const [mode, setMode] = useState<Mode>("choose");
   const [error, setError] = useState<string | null>(null);
   const [duration, setDuration] = useState(0);
@@ -60,8 +62,19 @@ export function VideoCapsuleUpload({
     };
   }, [clearTimer, stopStream, revokePreview]);
 
+  function translateDurationError(message: string | null): string | null {
+    if (!message) return null;
+    if (message.includes("seconds or less")) {
+      return t("videoUpload.tooLong", { max: MAX_VIDEO_DURATION_SECONDS });
+    }
+    if (message.includes("Invalid")) {
+      return t("videoUpload.invalidDuration");
+    }
+    return message;
+  }
+
   function setReadyFile(file: File, durationSeconds: number) {
-    const validationError = validateDuration(durationSeconds);
+    const validationError = translateDurationError(validateDuration(durationSeconds));
     if (validationError) {
       setError(validationError);
       return;
@@ -134,7 +147,7 @@ export function VideoCapsuleUpload({
         });
       }, 1000);
     } catch {
-      setError("Camera access denied or unavailable. Try uploading a file instead.");
+      setError(t("videoUpload.cameraError"));
       stopStream();
       setMode("choose");
     }
@@ -156,7 +169,7 @@ export function VideoCapsuleUpload({
       const d = await getVideoFileDuration(file);
       setReadyFile(file, d);
     } catch {
-      setError("Could not read that video file. Try another format.");
+      setError(t("videoUpload.readError"));
     }
   }
 
@@ -182,10 +195,10 @@ export function VideoCapsuleUpload({
             onClick={() => void handleStartRecording()}
             disabled={disabled}
           >
-            Record with camera
+            {t("videoUpload.record")}
           </button>
           <label className="flow-upload">
-            <span>Or upload a video (max {MAX_VIDEO_DURATION_SECONDS}s)</span>
+            <span>{t("videoUpload.upload", { max: MAX_VIDEO_DURATION_SECONDS })}</span>
             <input
               type="file"
               accept="video/webm,video/mp4,video/quicktime,video/*"
@@ -204,7 +217,7 @@ export function VideoCapsuleUpload({
             {formatDuration(elapsed)} / {formatDuration(MAX_VIDEO_DURATION_SECONDS)}
           </div>
           <button type="button" className="flow-btn flow-btn--secondary" onClick={handleStopRecording}>
-            Stop recording
+            {t("videoUpload.stop")}
           </button>
         </div>
       )}
@@ -213,11 +226,11 @@ export function VideoCapsuleUpload({
         <div className="flow-video-recorder">
           <video src={previewUrl} className="flow-video-preview" controls playsInline />
           <p className="flow-success">
-            ✓ Ready: <strong>{fileName}</strong> ({formatDuration(duration)})
+            {t("videoUpload.ready")}: <strong>{fileName}</strong> ({formatDuration(duration)})
           </p>
           {!disabled && (
             <button type="button" className="flow-btn flow-btn--secondary" onClick={handleRetake}>
-              Re-record / choose another
+              {t("videoUpload.retake")}
             </button>
           )}
         </div>

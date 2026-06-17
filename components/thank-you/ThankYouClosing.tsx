@@ -1,8 +1,10 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 export function ThankYouClosing() {
+  const { t } = useLocale();
   const reduceMotion = useReducedMotion();
 
   return (
@@ -16,14 +18,8 @@ export function ThankYouClosing() {
           : { delay: 0.9, duration: 0.7, ease: [0.22, 1, 0.36, 1] }
       }
     >
-      <p className="thank-you-closing-text">
-        Thank you for being part of our story
-      </p>
-      <p className="thank-you-closing-sub">
-        Every dua, photo, message, and vote tonight becomes part of a memory we
-        will cherish forever. May Allah bless this union with love, mercy, and
-        barakah.
-      </p>
+      <p className="thank-you-closing-text">{t("thankYou.closingTitle")}</p>
+      <p className="thank-you-closing-sub">{t("thankYou.closingSub")}</p>
     </motion.div>
   );
 }

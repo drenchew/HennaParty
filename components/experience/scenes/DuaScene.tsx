@@ -6,6 +6,7 @@ import { useExperienceContext } from "@/components/experience/ExperienceProvider
 import { SceneShell } from "@/components/experience/SceneShell";
 import { OrnamentalButton, OrnamentalCard, OrnamentFrame } from "@/components/ornamental";
 import { useFlowContext } from "@/components/providers/FlowProvider";
+import { useLocale } from "@/components/providers/LocaleProvider";
 import { isApiError } from "@/lib/utils/api";
 import { completeStep } from "@/services/mock/flow.service";
 import { acceptDuaFromApi, assignDuaFromApi } from "@/services/dua.service";
@@ -17,6 +18,7 @@ type LoadState = "loading" | "ready" | "error" | "exhausted";
 export function DuaScene() {
   const { refresh } = useFlowContext();
   const { nextStep, prevStep } = useExperienceContext();
+  const { t } = useLocale();
   const [dua, setDua] = useState<Dua | null>(null);
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -84,14 +86,14 @@ export function DuaScene() {
   return (
     <SceneShell
       step="dua"
-      title="Your Unique Dua"
-      subtitle="A prayer chosen just for you — may it bring barakah to the couple and to you."
+      title={t("dua.title")}
+      subtitle={t("dua.subtitle")}
       framed
       footer={
         loadState === "ready" ? (
           <ExperienceNav
             onBack={prevStep}
-            continueLabel={accepting ? "Accepting…" : "I accept this dua"}
+            continueLabel={accepting ? t("dua.accepting") : t("dua.accept")}
             onContinue={handleAccept}
             continueDisabled={!dua || accepting}
           />
@@ -99,21 +101,19 @@ export function DuaScene() {
       }
     >
       {loadState === "loading" && (
-        <p className="experience-loading">Assigning your unique dua…</p>
+        <p className="experience-loading">{t("dua.loading")}</p>
       )}
 
       {loadState === "exhausted" && (
         <OrnamentalCard>
-          <p className="experience-error">
-            All duas have been shared tonight. Thank you for being part of this celebration.
-          </p>
+          <p className="experience-error">{t("dua.exhausted")}</p>
         </OrnamentalCard>
       )}
 
       {loadState === "error" && (
         <OrnamentalCard>
           <div className="experience-stack">
-            <p className="experience-error">{errorMessage ?? "Could not load your dua."}</p>
+            <p className="experience-error">{errorMessage ?? t("dua.loadError")}</p>
             <OrnamentalButton
               variant="secondary"
               onClick={() => {
@@ -121,7 +121,7 @@ export function DuaScene() {
                 void loadDua();
               }}
             >
-              Try again
+              {t("common.tryAgain")}
             </OrnamentalButton>
           </div>
         </OrnamentalCard>

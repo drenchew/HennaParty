@@ -9,6 +9,7 @@ import {
 import { findGuestByToken } from "@/lib/guest/server";
 import { PHOTOS_BUCKET } from "@/lib/constants/steps";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { randomUUID } from "@/lib/utils/uuid";
 
 /** GET /api/photos — list guest photos with optional signed thumbnail URLs. */
 export async function GET(request: NextRequest) {
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = createAdminClient();
-    const photoId = crypto.randomUUID();
+    const photoId = randomUUID();
     const extension = file.name.split(".").pop() ?? "webp";
     const storagePath = `${guest.id}/${photoId}.${extension}`;
 

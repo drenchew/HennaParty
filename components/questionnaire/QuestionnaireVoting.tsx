@@ -1,7 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useLocale } from "@/components/providers/LocaleProvider";
 import { QUESTIONNAIRE_QUESTION_COUNT } from "@/lib/questionnaire/constants";
+import {
+  localizeOptionText,
+  localizeQuestionText,
+} from "@/lib/i18n/questionnaire-locale";
 import { isApiError } from "@/lib/utils/api";
 import {
   getVoteState,
@@ -20,6 +25,7 @@ export function QuestionnaireVoting({
   onVotesChange,
   showLiveResults: showLiveResultsDefault = false,
 }: QuestionnaireVotingProps) {
+  const { t, locale } = useLocale();
   const [questions, setQuestions] = useState<VoteQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [results, setResults] = useState<QuestionResult[]>([]);
@@ -91,42 +97,45 @@ export function QuestionnaireVoting({
   const allAnswered = answeredCount >= QUESTIONNAIRE_QUESTION_COUNT;
 
   if (loading) {
-    return <p className="flow-loading">Loading questionnaire…</p>;
+    return <p className="flow-loading">{t("questionnaireUi.loading")}</p>;
   }
 
   return (
     <div className="flow-stack">
       <div className="flow-card flow-stack questionnaire-toolbar">
         <p className="flow-meta">
-          {answeredCount} / {QUESTIONNAIRE_QUESTION_COUNT} questions answered
-          {allAnswered && " · Complete!"}
+          {answeredCount} / {QUESTIONNAIRE_QUESTION_COUNT} {t("questionnaireUi.answered")}
+          {allAnswered && t("questionnaireUi.complete")}
         </p>
         <button
           type="button"
           className="flow-btn flow-btn--secondary"
           onClick={() => void toggleLiveResults()}
         >
-          {showLiveResults ? "Hide live results" : "Show live results"}
+          {showLiveResults ? t("questionnaireUi.hideResults") : t("questionnaireUi.showResults")}
         </button>
       </div>
 
       {questions.map((question) => (
         <fieldset key={question.id} className="flow-card flow-question">
-          <legend className="flow-question-title">{question.question_text}</legend>
+          <legend className="flow-question-title">
+            {localizeQuestionText(question.id, locale, question.question_text)}
+          </legend>
           <div className="flow-options">
             {question.options.map((option) => {
-              const selected = answers[question.id] === option.option_text;
+              const canonical = option.option_text;
+              const selected = answers[question.id] === canonical;
               const busy = votingId === question.id;
               return (
                 <button
-                  key={option.option_text}
+                  key={canonical}
                   type="button"
                   disabled={busy}
                   className={`flow-option${selected ? " flow-option--selected" : ""}`}
                   aria-pressed={selected}
-                  onClick={() => void handleSelect(question.id, option.option_text)}
+                  onClick={() => void handleSelect(question.id, canonical)}
                 >
-                  {option.option_text}
+                  {localizeOptionText(question.id, canonical, locale)}
                 </button>
               );
             })}

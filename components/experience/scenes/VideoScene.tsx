@@ -7,6 +7,7 @@ import { SceneShell } from "@/components/experience/SceneShell";
 import { OrnamentalCard } from "@/components/ornamental";
 import { VideoCapsuleUpload } from "@/components/video/VideoCapsuleUpload";
 import { useFlowContext } from "@/components/providers/FlowProvider";
+import { useLocale } from "@/components/providers/LocaleProvider";
 import { isApiError } from "@/lib/utils/api";
 import { formatUnlockDate } from "@/lib/utils/video-metadata";
 import { completeStep } from "@/services/mock/flow.service";
@@ -16,6 +17,7 @@ import type { SafeVideo } from "@/services/video.service";
 export function VideoScene() {
   const { refresh } = useFlowContext();
   const { nextStep, prevStep, setTransitionLocked } = useExperienceContext();
+  const { t } = useLocale();
   const [uploaded, setUploaded] = useState<SafeVideo | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [pendingDuration, setPendingDuration] = useState(0);
@@ -67,7 +69,7 @@ export function VideoScene() {
     }
 
     if (!pendingFile) {
-      setError("Please record or upload a video first.");
+      setError(t("video.needVideo"));
       return false;
     }
 
@@ -94,14 +96,18 @@ export function VideoScene() {
   return (
     <SceneShell
       step="video"
-      title="Video Time Capsule"
-      subtitle="Record or upload a short message (max 60 seconds). It will be locked for one year."
+      title={t("video.title")}
+      subtitle={t("video.subtitle")}
       footer={
         !loading ? (
           <ExperienceNav
             onBack={prevStep}
             continueLabel={
-              uploading ? "Uploading…" : uploaded ? "Continue" : "Save & Continue"
+              uploading
+                ? t("video.uploading")
+                : uploaded
+                  ? t("common.continue")
+                  : t("video.saveContinue")
             }
             onContinue={handleContinue}
             continueDisabled={uploading || (!uploaded && !pendingFile)}
@@ -109,18 +115,17 @@ export function VideoScene() {
         ) : null
       }
     >
-      {loading && <p className="experience-loading">Checking time capsule status…</p>}
+      {loading && <p className="experience-loading">{t("video.loading")}</p>}
 
       {!loading && uploaded && (
         <OrnamentalCard>
           <div className="experience-stack">
-            <p className="experience-success">✓ Your time capsule has been saved securely.</p>
+            <p className="experience-success">{t("video.saved")}</p>
             <p className="experience-meta">
-              Unlocks on <strong>{formatUnlockDate(uploaded.unlock_date)}</strong>
+              {t("video.unlocks")}{" "}
+              <strong>{formatUnlockDate(uploaded.unlock_date)}</strong>
             </p>
-            <p className="experience-meta">
-              Your video cannot be viewed until then — not even by you. This is by design.
-            </p>
+            <p className="experience-meta">{t("video.lockedNote")}</p>
           </div>
         </OrnamentalCard>
       )}

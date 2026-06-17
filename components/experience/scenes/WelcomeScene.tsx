@@ -7,6 +7,7 @@ import { ExperienceNav } from "@/components/experience/ExperienceNav";
 import { SceneShell } from "@/components/experience/SceneShell";
 import { useExperienceContext } from "@/components/experience/ExperienceProvider";
 import { useFlowContext } from "@/components/providers/FlowProvider";
+import { useLocale } from "@/components/providers/LocaleProvider";
 import { isApiError } from "@/lib/utils/api";
 import { completeStep } from "@/services/mock/flow.service";
 import { initGuest } from "@/services/guest.service";
@@ -14,6 +15,7 @@ import { initGuest } from "@/services/guest.service";
 export function WelcomeScene() {
   const { guestToken, refresh } = useFlowContext();
   const { nextStep } = useExperienceContext();
+  const { t } = useLocale();
   const [starting, setStarting] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
 
@@ -39,12 +41,12 @@ export function WelcomeScene() {
     <GuestTokenInit>
       <SceneShell
         step="welcome"
-        title="Welcome to our Henna Night"
-        subtitle="Thank you for being part of this special celebration. Each guest receives a unique experience — let's begin yours."
+        title={t("welcome.title")}
+        subtitle={t("welcome.subtitle")}
         framed
         footer={
           <ExperienceNav
-            continueLabel={starting ? "Starting…" : "Begin the Journey"}
+            continueLabel={starting ? t("welcome.starting") : t("welcome.begin")}
             onContinue={handleStart}
             continueDisabled={starting}
             showBack={false}
@@ -52,13 +54,10 @@ export function WelcomeScene() {
         }
       >
         <OrnamentalCard corners>
-          <p className="experience-copy">
-            Your anonymous session is ready. No login required — we&apos;ve created a private
-            guest ID just for you.
-          </p>
+          <p className="experience-copy">{t("welcome.sessionReady")}</p>
           {guestToken && (
             <p className="experience-meta">
-              Session: <code>{guestToken.slice(0, 8)}…</code>
+              {t("welcome.session")}: <code>{guestToken.slice(0, 8)}…</code>
             </p>
           )}
           {startError && <p className="experience-error">{startError}</p>}

@@ -38,7 +38,7 @@ export function WelcomePage() {
     <GuestTokenInit>
       <FlowLayout
         step="welcome"
-        title="Welcome to our Henna Night"
+        title="ليلة حناء عايدة"
         subtitle="Thank you for being part of this special celebration. Each guest receives a unique experience — let's begin yours."
         footer={
           <FlowButton
@@ -50,8 +50,7 @@ export function WelcomePage() {
       >
         <div className="flow-card">
           <p>
-            Your anonymous session is ready. No login required — we&apos;ve created a private
-            guest ID just for you.
+            We Prepared For You Something Special!
           </p>
           {guestToken && (
             <p className="flow-meta">

@@ -7,6 +7,7 @@ import {
   validatePhotoCount,
   validatePhotoFile,
 } from "@/lib/photo/validation";
+import { randomUUID } from "@/lib/utils/uuid";
 
 export interface PhotoRecord {
   id: string;
@@ -80,7 +81,7 @@ export async function uploadPhotoForGuest(
   }
 
   const supabase = createAdminClient();
-  const photoId = crypto.randomUUID();
+  const photoId = randomUUID();
   const storagePath = buildPhotoStoragePath(guest.id, photoId, file.type);
 
   const { error: uploadError } = await supabase.storage

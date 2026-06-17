@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useLocale } from "@/components/providers/LocaleProvider";
 import { MAX_PHOTOS_PER_GUEST } from "@/lib/constants/steps";
 import { compressImage } from "@/lib/utils/image-compress";
 import { isApiError } from "@/lib/utils/api";
@@ -13,6 +14,7 @@ import {
 } from "@/services/photo.service";
 
 export function PhotoUpload() {
+  const { t } = useLocale();
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
   const [quota, setQuota] = useState<PhotoQuota>({
     count: 0,
@@ -64,7 +66,7 @@ export function PhotoUpload() {
 
       await loadPhotos();
     } catch {
-      setError("Could not process that image. Try JPEG or PNG.");
+      setError(t("photosUpload.processError"));
     } finally {
       setUploading(false);
       setProgress(0);
@@ -84,19 +86,21 @@ export function PhotoUpload() {
   const atLimit = quota.remaining <= 0;
 
   if (loading) {
-    return <p className="flow-loading">Loading your photos…</p>;
+    return <p className="flow-loading">{t("photosUpload.loading")}</p>;
   }
 
   return (
     <div className="flow-stack">
       <p className="flow-meta">
-        {quota.count} / {quota.max} photos uploaded
-        {atLimit && " — limit reached"}
+        {quota.count} / {quota.max} {t("photosUpload.uploaded")}
+        {atLimit && t("photosUpload.limitReached")}
       </p>
 
       {!atLimit && !uploading && (
         <label className="flow-upload">
-          <span>Add photo ({quota.remaining} remaining)</span>
+          <span>
+            {t("photosUpload.addPhoto")} ({quota.remaining} {t("photosUpload.remaining")})
+          </span>
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp,image/*"
@@ -115,7 +119,9 @@ export function PhotoUpload() {
               style={{ width: `${progress}%` }}
             />
           </div>
-          <p className="flow-meta">Uploading… {progress}%</p>
+          <p className="flow-meta">
+            {t("photosUpload.uploading")} {progress}%
+          </p>
         </div>
       )}
 
@@ -126,14 +132,14 @@ export function PhotoUpload() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={photo.signed_url ?? undefined}
-                alt={`Guest photo ${index + 1}`}
+                alt={`${t("photosUpload.guestPhoto")} ${index + 1}`}
                 className="flow-photo-thumb"
               />
               {!uploading && (
                 <button
                   type="button"
                   className="flow-photo-remove"
-                  aria-label={`Remove photo ${index + 1}`}
+                  aria-label={`${t("photosUpload.removePhoto")} ${index + 1}`}
                   onClick={() => void handleDelete(photo.id)}
                 >
                   ×
@@ -143,9 +149,7 @@ export function PhotoUpload() {
           ))}
         </ul>
       ) : (
-        !uploading && (
-          <p className="flow-meta">No photos yet — optional, you can continue anytime.</p>
-        )
+        !uploading && <p className="flow-meta">{t("photosUpload.noPhotos")}</p>
       )}
 
       {error && <p className="flow-error">{error}</p>}

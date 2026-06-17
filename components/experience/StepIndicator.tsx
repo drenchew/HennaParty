@@ -3,6 +3,7 @@
 import { EXPERIENCE_PROGRESS_STEPS } from "@/lib/experience/steps";
 import type { GuestStep } from "@/lib/constants/steps";
 import { useFlowContext } from "@/components/providers/FlowProvider";
+import { useLocale } from "@/components/providers/LocaleProvider";
 
 interface StepIndicatorProps {
   currentStep: GuestStep;
@@ -11,12 +12,13 @@ interface StepIndicatorProps {
 /** Ornamental progress dots — tatreez-inspired, not a SaaS stepper. */
 export function StepIndicator({ currentStep }: StepIndicatorProps) {
   const { isComplete } = useFlowContext();
+  const { t } = useLocale();
   const currentIndex = EXPERIENCE_PROGRESS_STEPS.indexOf(
     currentStep as (typeof EXPERIENCE_PROGRESS_STEPS)[number],
   );
 
   return (
-    <nav className="experience-steps" aria-label="Progress">
+    <nav className="experience-steps" aria-label={t("common.progress")}>
       <ol className="experience-steps__list">
         {EXPERIENCE_PROGRESS_STEPS.map((step, index) => {
           let status: "complete" | "current" | "upcoming" = "upcoming";

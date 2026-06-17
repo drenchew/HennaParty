@@ -6,12 +6,14 @@ import { useExperienceContext } from "@/components/experience/ExperienceProvider
 import { SceneShell } from "@/components/experience/SceneShell";
 import { QuestionnaireVoting } from "@/components/questionnaire/QuestionnaireVoting";
 import { useFlowContext } from "@/components/providers/FlowProvider";
+import { useLocale } from "@/components/providers/LocaleProvider";
 import { QUESTIONNAIRE } from "@/lib/questionnaire/constants";
 import { completeStep } from "@/services/mock/flow.service";
 
 export function QuestionnaireScene() {
   const { refresh } = useFlowContext();
   const { nextStep, prevStep } = useExperienceContext();
+  const { t } = useLocale();
   const [answers, setAnswers] = useState<Record<number, string>>({});
 
   const allAnswered = QUESTIONNAIRE.every((q) => Boolean(answers[q.id]));
@@ -27,12 +29,12 @@ export function QuestionnaireScene() {
   return (
     <SceneShell
       step="questionnaire"
-      title="Fun Questionnaire"
-      subtitle="Vote on each question — one answer per question. See how other guests voted with live results."
+      title={t("questionnaire.title")}
+      subtitle={t("questionnaire.subtitle")}
       footer={
         <ExperienceNav
           onBack={prevStep}
-          continueLabel="See Thank You"
+          continueLabel={t("questionnaire.finish")}
           onContinue={handleFinish}
           continueDisabled={!allAnswered}
         />
