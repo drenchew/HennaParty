@@ -1,23 +1,46 @@
 "use client";
 
-import { PageShell } from "@/components/layout/PageShell";
-import { StepNavigation, StepPlaceholder } from "@/components/layout/StepNavigation";
-import { useGuestContext } from "@/components/providers/GuestProvider";
-import { useStepGuard } from "@/hooks/useStepGuard";
+import { useState } from "react";
+import { FlowLayout } from "@/components/layout/FlowLayout";
+import { FlowNav } from "@/components/layout/FlowNavigation";
+import { StepGuard } from "@/components/layout/StepGuard";
+import { QuestionnaireVoting } from "@/components/questionnaire/QuestionnaireVoting";
+import { useFlowContext } from "@/components/providers/FlowProvider";
+import { QUESTIONNAIRE } from "@/lib/questionnaire/constants";
 import { STEP_ROUTES } from "@/lib/constants/steps";
+import { completeStep } from "@/services/mock/flow.service";
 
-/** Questionnaire step — MCQ votes; UI placeholder. */
 export function QuestionnairePage() {
-  const { progress, isLoading } = useGuestContext();
-  useStepGuard("questionnaire", progress, isLoading);
+  const { refresh, nextRoute } = useFlowContext();
+  const [answers, setAnswers] = useState<Record<number, string>>({});
+
+  const allAnswered = QUESTIONNAIRE.every((q) => Boolean(answers[q.id]));
+
+  async function handleFinish(): Promise<boolean> {
+    if (!allAnswered) return false;
+    completeStep("questionnaire");
+    refresh();
+    return true;
+  }
 
   return (
-    <PageShell step="questionnaire">
-      <StepPlaceholder
+    <StepGuard step="questionnaire">
+      <FlowLayout
+        step="questionnaire"
         title="Fun Questionnaire"
-        description="Architecture shell — QuestionCard posts to /api/questionnaire/vote."
-      />
-      <StepNavigation href={STEP_ROUTES.complete} label="Finish" nextStep="complete" />
-    </PageShell>
+        subtitle="Vote on each question — one answer per question. See how other guests voted with live results."
+        footer={
+          <FlowNav
+            backHref={STEP_ROUTES.advice}
+            nextLabel="See Thank You"
+            onNext={handleFinish}
+            nextHref={nextRoute("questionnaire")}
+            nextDisabled={!allAnswered}
+          />
+        }
+      >
+        <QuestionnaireVoting onVotesChange={setAnswers} />
+      </FlowLayout>
+    </StepGuard>
   );
 }

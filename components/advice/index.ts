@@ -1,2 +1,1 @@
-/** Advice form components — UI phase. */
-export {};
+export { AdviceForm, type AdviceFormHandle } from "./AdviceForm";

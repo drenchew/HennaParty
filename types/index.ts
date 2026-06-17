@@ -21,6 +21,7 @@ export interface Dua {
   used: boolean;
   assigned_guest_id: string | null;
   assigned_at: string | null;
+  accepted_at?: string | null;
 }
 
 export interface Photo {

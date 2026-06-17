@@ -1,3 +1,380 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --henna-bg: #1a0f12;
+  --henna-surface: #2a1619;
+  --henna-accent: #c9785c;
+  --henna-gold: #d4a853;
+  --henna-text: #faf3eb;
+  --henna-muted: #c4b0a5;
+  --henna-success: #7cb87c;
+  --henna-error: #e07a7a;
+}
+
+@layer base {
+  body.flow-body {
+    @apply min-h-screen antialiased;
+    background: radial-gradient(ellipse at top, #3d1f24 0%, var(--henna-bg) 55%);
+    color: var(--henna-text);
+  }
+}
+
+@layer components {
+  .flow-app {
+    @apply mx-auto flex min-h-screen max-w-lg flex-col px-4 py-6 sm:px-6;
+  }
+
+  .flow-page {
+    @apply flex flex-1 flex-col gap-6;
+  }
+
+  .flow-header {
+    @apply space-y-2 text-center;
+  }
+
+  .flow-eyebrow {
+    @apply text-xs uppercase tracking-[0.25em];
+    color: var(--henna-gold);
+  }
+
+  .flow-title {
+    @apply text-2xl font-semibold leading-tight sm:text-3xl;
+  }
+
+  .flow-subtitle {
+    @apply text-sm leading-relaxed sm:text-base;
+    color: var(--henna-muted);
+  }
+
+  .flow-content {
+    @apply flex-1;
+  }
+
+  .flow-footer {
+    @apply pt-2;
+  }
+
+  .flow-card {
+    @apply rounded-2xl border p-5;
+    background: color-mix(in srgb, var(--henna-surface) 90%, black);
+    border-color: color-mix(in srgb, var(--henna-accent) 30%, transparent);
+  }
+
+  .flow-stack {
+    @apply flex flex-col gap-4;
+  }
+
+  .flow-meta {
+    @apply text-xs;
+    color: var(--henna-muted);
+  }
+
+  .flow-meta--top {
+    @apply mt-4 border-t pt-4;
+    border-color: color-mix(in srgb, var(--henna-accent) 20%, transparent);
+  }
+
+  .flow-loading,
+  .flow-guard-loading {
+    @apply text-center text-sm;
+    color: var(--henna-muted);
+  }
+
+  .flow-error {
+    color: var(--henna-error);
+    @apply text-sm;
+  }
+
+  .flow-success {
+    color: var(--henna-success);
+    @apply text-sm leading-relaxed;
+  }
+
+  .flow-btn {
+    @apply w-full rounded-full px-6 py-3 text-sm font-semibold transition;
+  }
+
+  .flow-btn--primary {
+    background: linear-gradient(135deg, var(--henna-accent), var(--henna-gold));
+    color: var(--henna-bg);
+  }
+
+  .flow-btn--primary:disabled {
+    @apply cursor-not-allowed opacity-40;
+  }
+
+  .flow-btn--secondary {
+    @apply border;
+    border-color: color-mix(in srgb, var(--henna-accent) 40%, transparent);
+    color: var(--henna-text);
+    background: transparent;
+  }
+
+  .flow-nav {
+    @apply flex flex-col gap-3 sm:flex-row;
+  }
+
+  .flow-nav .flow-btn--secondary {
+    @apply sm:w-auto sm:min-w-[7rem];
+  }
+
+  .flow-stepper {
+    @apply space-y-2;
+  }
+
+  .flow-stepper-list {
+    @apply flex gap-1 overflow-x-auto pb-1;
+  }
+
+  .flow-stepper-item {
+    @apply flex-1 min-w-[4.5rem];
+  }
+
+  .flow-stepper-link {
+    @apply flex flex-col items-center gap-1 rounded-lg px-1 py-2 text-center text-[10px] leading-tight sm:text-xs;
+    color: var(--henna-muted);
+  }
+
+  .flow-stepper-link--locked {
+    @apply opacity-40;
+  }
+
+  .flow-stepper-item[data-status="current"] .flow-stepper-link {
+    color: var(--henna-gold);
+  }
+
+  .flow-stepper-item[data-status="complete"] .flow-stepper-dot {
+    background: var(--henna-success);
+    color: var(--henna-bg);
+  }
+
+  .flow-stepper-dot {
+    @apply flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold;
+    background: color-mix(in srgb, var(--henna-surface) 80%, white 10%);
+  }
+
+  .flow-stepper-item[data-status="current"] .flow-stepper-dot {
+    background: var(--henna-gold);
+    color: var(--henna-bg);
+  }
+
+  .flow-stepper-meta {
+    @apply text-center text-xs;
+    color: var(--henna-muted);
+  }
+
+  .flow-dua-arabic {
+    @apply text-xl leading-loose sm:text-2xl;
+  }
+
+  .flow-dua-translation {
+    @apply mt-4 text-sm italic leading-relaxed;
+    color: var(--henna-muted);
+  }
+
+  .flow-upload {
+    @apply flex cursor-pointer flex-col gap-2 rounded-xl border border-dashed p-4 text-center text-sm;
+    border-color: color-mix(in srgb, var(--henna-accent) 35%, transparent);
+  }
+
+  .flow-upload input {
+    @apply text-xs;
+    color: var(--henna-muted);
+  }
+
+  .flow-photo-grid {
+    @apply grid grid-cols-3 gap-2;
+  }
+
+  .flow-photo-item {
+    @apply relative;
+  }
+
+  .flow-photo-remove {
+    @apply absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full text-sm font-bold leading-none;
+    background: color-mix(in srgb, var(--henna-bg) 75%, black);
+    color: var(--henna-text);
+  }
+
+  .flow-upload-progress {
+    @apply space-y-2;
+  }
+
+  .flow-upload-progress-bar {
+    @apply h-2 w-full overflow-hidden rounded-full;
+    background: color-mix(in srgb, var(--henna-surface) 80%, white 5%);
+  }
+
+  .flow-upload-progress-fill {
+    @apply h-full rounded-full transition-all duration-200;
+    background: linear-gradient(90deg, var(--henna-accent), var(--henna-gold));
+  }
+
+  .flow-photo-thumb {
+    @apply aspect-square w-full rounded-lg object-cover;
+  }
+
+  .flow-textarea {
+    @apply w-full resize-none rounded-xl border bg-transparent p-3 text-sm outline-none focus:ring-2;
+    border-color: color-mix(in srgb, var(--henna-accent) 35%, transparent);
+    color: var(--henna-text);
+  }
+
+  .flow-question {
+    @apply space-y-3;
+  }
+
+  .flow-question-title {
+    @apply text-sm font-medium;
+  }
+
+  .flow-options {
+    @apply grid grid-cols-2 gap-2;
+  }
+
+  .flow-option {
+    @apply rounded-xl border px-3 py-2 text-left text-xs sm:text-sm;
+    border-color: color-mix(in srgb, var(--henna-accent) 25%, transparent);
+    color: var(--henna-text);
+  }
+
+  .flow-option--selected {
+    border-color: var(--henna-gold);
+    background: color-mix(in srgb, var(--henna-gold) 15%, transparent);
+  }
+
+  .flow-stats-title {
+    @apply mb-4 text-lg font-medium;
+  }
+
+  .flow-stats {
+    @apply grid grid-cols-2 gap-4;
+  }
+
+  .flow-stats dt {
+    @apply text-xs uppercase tracking-wide;
+    color: var(--henna-muted);
+  }
+
+  .flow-stats dd {
+    @apply text-2xl font-semibold;
+    color: var(--henna-gold);
+  }
+
+  .flow-step-label {
+    @apply sr-only;
+  }
+
+  .flow-video-recorder {
+    @apply flex flex-col gap-3;
+  }
+
+  .flow-video-preview {
+    @apply aspect-video w-full rounded-xl bg-black object-cover;
+  }
+
+  .flow-video-timer {
+    @apply text-center text-lg font-semibold tabular-nums;
+    color: var(--henna-gold);
+  }
+
+  .flow-video-timer[data-warning="true"] {
+    color: var(--henna-error);
+  }
+
+  .admin-panel {
+    @apply w-full max-w-2xl mx-auto;
+  }
+
+  .admin-secret-input {
+    @apply min-h-0 py-3;
+  }
+
+  .admin-message-list {
+    @apply flex flex-col gap-4;
+  }
+
+  .admin-message-text {
+    @apply whitespace-pre-wrap text-sm leading-relaxed;
+  }
+
+  .questionnaire-toolbar {
+    @apply flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between;
+  }
+
+  .live-results-question + .live-results-question {
+    @apply mt-4 border-t pt-4;
+    border-color: color-mix(in srgb, var(--henna-accent) 20%, transparent);
+  }
+
+  .live-results-bars {
+    @apply mt-3 space-y-3;
+  }
+
+  .live-results-label {
+    @apply mb-1 flex justify-between gap-2 text-xs;
+    color: var(--henna-muted);
+  }
+
+  .live-results-track {
+    @apply h-2 w-full overflow-hidden rounded-full;
+    background: color-mix(in srgb, var(--henna-surface) 80%, white 5%);
+  }
+
+  .live-results-fill {
+    @apply h-full rounded-full transition-all duration-500;
+    background: linear-gradient(90deg, var(--henna-accent), var(--henna-gold));
+  }
+
+  .thank-you-page {
+    @apply flex flex-col gap-8 text-center;
+  }
+
+  .thank-you-header {
+    @apply space-y-2;
+  }
+
+  .thank-you-card {
+    @apply text-left;
+  }
+
+  .thank-you-stats {
+    @apply grid grid-cols-2 gap-4;
+  }
+
+  .thank-you-stat {
+    @apply rounded-xl border p-4 text-center;
+    border-color: color-mix(in srgb, var(--henna-accent) 25%, transparent);
+    background: color-mix(in srgb, var(--henna-bg) 40%, transparent);
+  }
+
+  .thank-you-stat dt {
+    @apply mb-2 flex flex-col items-center gap-1 text-xs uppercase tracking-wide;
+    color: var(--henna-muted);
+  }
+
+  .thank-you-stat dd {
+    @apply text-3xl font-semibold tabular-nums;
+    color: var(--henna-gold);
+  }
+
+  .thank-you-stat-emoji {
+    @apply text-xl not-italic;
+  }
+
+  .thank-you-closing {
+    @apply space-y-3 px-2;
+  }
+
+  .thank-you-closing-text {
+    @apply text-xl font-medium leading-snug sm:text-2xl;
+    color: var(--henna-gold);
+  }
+
+  .thank-you-closing-sub {
+    @apply text-sm leading-relaxed;
+    color: var(--henna-muted);
+  }
+}

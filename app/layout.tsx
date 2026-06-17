@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { GuestProvider } from "@/components/providers/GuestProvider";
+import { FlowProvider } from "@/components/providers/FlowProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -14,8 +14,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
-        <GuestProvider>{children}</GuestProvider>
+      <body className="flow-body">
+        <FlowProvider>
+          <div className="flow-app">{children}</div>
+        </FlowProvider>
       </body>
     </html>
   );

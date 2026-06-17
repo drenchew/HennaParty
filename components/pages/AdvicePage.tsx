@@ -1,27 +1,46 @@
 "use client";
 
-import { PageShell } from "@/components/layout/PageShell";
-import { StepNavigation, StepPlaceholder } from "@/components/layout/StepNavigation";
-import { useGuestContext } from "@/components/providers/GuestProvider";
-import { useStepGuard } from "@/hooks/useStepGuard";
+import { useRef } from "react";
+import { FlowLayout } from "@/components/layout/FlowLayout";
+import { FlowNav } from "@/components/layout/FlowNavigation";
+import { StepGuard } from "@/components/layout/StepGuard";
+import { AdviceForm, type AdviceFormHandle } from "@/components/advice/AdviceForm";
+import { useFlowContext } from "@/components/providers/FlowProvider";
 import { STEP_ROUTES } from "@/lib/constants/steps";
+import { completeStep } from "@/services/mock/flow.service";
 
-/** Advice step — message for the couple; UI placeholder. */
 export function AdvicePage() {
-  const { progress, isLoading } = useGuestContext();
-  useStepGuard("advice", progress, isLoading);
+  const { refresh, nextRoute } = useFlowContext();
+  const formRef = useRef<AdviceFormHandle>(null);
+
+  async function handleContinue(): Promise<boolean> {
+    const ok = (await formRef.current?.submit()) ?? false;
+    if (!ok) return false;
+
+    completeStep("advice");
+    refresh();
+    return true;
+  }
 
   return (
-    <PageShell step="advice">
-      <StepPlaceholder
+    <StepGuard step="advice">
+      <FlowLayout
+        step="advice"
         title="Leave Your Advice"
-        description="Architecture shell — AdviceForm posts to /api/advice."
-      />
-      <StepNavigation
-        href={STEP_ROUTES.questionnaire}
-        label="Continue"
-        nextStep="questionnaire"
-      />
-    </PageShell>
+        subtitle="Share a message, du'a, or piece of wisdom for the couple. You cannot edit after submitting."
+        footer={
+          <FlowNav
+            backHref={STEP_ROUTES.photos}
+            nextLabel="Submit Advice"
+            onNext={handleContinue}
+            nextHref={nextRoute("advice")}
+          />
+        }
+      >
+        <div className="flow-card">
+          <AdviceForm ref={formRef} />
+        </div>
+      </FlowLayout>
+    </StepGuard>
   );
 }

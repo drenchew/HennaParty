@@ -7,7 +7,7 @@ import {
   unauthorized,
 } from "@/lib/api/response";
 import { findGuestByToken } from "@/lib/guest/server";
-import { QUESTIONNAIRE } from "@/lib/constants/steps";
+import { isValidAnswer } from "@/lib/questionnaire/constants";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 /** POST /api/questionnaire/vote — record one answer per question per guest. */
@@ -31,8 +31,7 @@ export async function POST(request: NextRequest) {
       return jsonError("question_id and answer are required", 400, "INVALID_PAYLOAD");
     }
 
-    const question = QUESTIONNAIRE.find((q) => q.id === questionId);
-    if (!question || !question.options.includes(answer)) {
+    if (!isValidAnswer(questionId, answer)) {
       return jsonError("Invalid question or answer", 400, "INVALID_VOTE");
     }
 

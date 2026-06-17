@@ -44,7 +44,7 @@ export async function getGuestProgress(guestId: string): Promise<GuestProgress> 
     await Promise.all([
       supabase
         .from("duas")
-        .select("id, assigned_at")
+        .select("id, assigned_at, accepted_at")
         .eq("assigned_guest_id", guestId)
         .maybeSingle(),
       supabase.from("videos").select("id").eq("guest_id", guestId).maybeSingle(),
@@ -54,7 +54,7 @@ export async function getGuestProgress(guestId: string): Promise<GuestProgress> 
     ]);
 
   const hasDua = Boolean(duaResult.data);
-  const duaAccepted = Boolean(duaResult.data?.assigned_at);
+  const duaAccepted = Boolean(duaResult.data?.accepted_at);
   const hasVideo = Boolean(videoResult.data);
   const photoCount = photosResult.count ?? 0;
   const hasMessage = Boolean(messageResult.data);

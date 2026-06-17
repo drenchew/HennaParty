@@ -1,0 +1,1 @@
+export { VideoCapsuleUpload } from "./VideoCapsuleUpload";

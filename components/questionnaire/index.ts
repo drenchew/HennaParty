@@ -1,2 +1,2 @@
-/** Questionnaire components — UI phase. */
-export {};
+export { QuestionnaireVoting } from "./QuestionnaireVoting";
+export { LiveResults } from "./LiveResults";

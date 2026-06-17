@@ -1,23 +1,40 @@
 "use client";
 
-import { PageShell } from "@/components/layout/PageShell";
-import { StepNavigation, StepPlaceholder } from "@/components/layout/StepNavigation";
-import { useGuestContext } from "@/components/providers/GuestProvider";
-import { useStepGuard } from "@/hooks/useStepGuard";
-import { STEP_ROUTES } from "@/lib/constants/steps";
+import { FlowLayout } from "@/components/layout/FlowLayout";
+import { FlowNav } from "@/components/layout/FlowNavigation";
+import { StepGuard } from "@/components/layout/StepGuard";
+import { PhotoUpload } from "@/components/photos/PhotoUpload";
+import { useFlowContext } from "@/components/providers/FlowProvider";
+import { MAX_PHOTOS_PER_GUEST, STEP_ROUTES } from "@/lib/constants/steps";
+import { completeStep } from "@/services/mock/flow.service";
 
-/** Photos step — up to 3 uploads; UI placeholder. */
 export function PhotosPage() {
-  const { progress, isLoading } = useGuestContext();
-  useStepGuard("photos", progress, isLoading);
+  const { refresh, nextRoute } = useFlowContext();
+
+  function handleContinue() {
+    completeStep("photos");
+    refresh();
+  }
 
   return (
-    <PageShell step="photos">
-      <StepPlaceholder
+    <StepGuard step="photos">
+      <FlowLayout
+        step="photos"
         title="Share Your Photos"
-        description="Architecture shell — PhotoCapture with camera/gallery."
-      />
-      <StepNavigation href={STEP_ROUTES.advice} label="Continue" nextStep="advice" />
-    </PageShell>
+        subtitle={`Upload up to ${MAX_PHOTOS_PER_GUEST} photos from tonight.`}
+        footer={
+          <FlowNav
+            backHref={STEP_ROUTES.video}
+            nextLabel="Continue"
+            onNext={handleContinue}
+            nextHref={nextRoute("photos")}
+          />
+        }
+      >
+        <div className="flow-card">
+          <PhotoUpload />
+        </div>
+      </FlowLayout>
+    </StepGuard>
   );
 }

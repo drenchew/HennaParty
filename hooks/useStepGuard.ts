@@ -1,29 +1,51 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { pathnameToStep } from "@/lib/flow/progress";
+import type { FlowState } from "@/lib/flow/types";
 import { STEP_ROUTES, type GuestStep } from "@/lib/constants/steps";
-import { getStoredStep } from "@/lib/guest/step-storage";
-import { isStepAtLeast, resolveAllowedStep } from "@/lib/utils/steps";
-import type { GuestProgress } from "@/types";
 
 /**
- * Redirects guests who bookmark ahead to their furthest allowed step.
- * Combines server progress with localStorage step hint for photos → advice transition.
+ * Redirects guests who navigate to a locked step back to their max accessible step.
  */
 export function useStepGuard(
-  requiredStep: GuestStep,
-  progress: GuestProgress | null,
-  isLoading: boolean,
+  step: GuestStep,
+  flowState: FlowState | null,
+  isReady: boolean,
+  canAccess: (step: GuestStep) => boolean,
 ): void {
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
-    if (isLoading || !progress) return;
+    if (!isReady || !flowState) return;
 
-    const allowed = resolveAllowedStep(progress, getStoredStep());
-    if (!isStepAtLeast(allowed, requiredStep)) {
-      router.replace(STEP_ROUTES[allowed]);
+    const currentStep = pathnameToStep(pathname);
+    if (!currentStep) return;
+
+    if (!canAccess(currentStep)) {
+      const fallback = canAccess(step)
+        ? step
+        : findFirstAccessible(canAccess);
+      router.replace(STEP_ROUTES[fallback]);
     }
-  }, [requiredStep, progress, isLoading, router]);
+  }, [step, flowState, isReady, canAccess, router, pathname]);
+}
+
+function findFirstAccessible(canAccess: (step: GuestStep) => boolean): GuestStep {
+  const order: GuestStep[] = [
+    "welcome",
+    "dua",
+    "video",
+    "photos",
+    "advice",
+    "questionnaire",
+    "complete",
+  ];
+  for (let i = order.length - 1; i >= 0; i -= 1) {
+    const step = order[i]!;
+    if (canAccess(step)) return step;
+  }
+  return "welcome";
 }

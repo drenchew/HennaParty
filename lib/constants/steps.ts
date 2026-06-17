@@ -2,7 +2,7 @@
 export const GUEST_STEPS = [
   "welcome",
   "dua",
-  "capsule",
+  "video",
   "photos",
   "advice",
   "questionnaire",
@@ -15,23 +15,26 @@ export type GuestStep = (typeof GUEST_STEPS)[number];
 export const STEP_ROUTES: Record<GuestStep, string> = {
   welcome: "/",
   dua: "/dua",
-  capsule: "/capsule",
+  video: "/video",
   photos: "/photos",
   advice: "/advice",
   questionnaire: "/questionnaire",
   complete: "/thank-you",
 };
 
-/** Human-readable labels for the progress stepper (UI will consume these). */
+/** Human-readable labels for the progress stepper. */
 export const STEP_LABELS: Record<GuestStep, string> = {
   welcome: "Welcome",
   dua: "Your Dua",
-  capsule: "Time Capsule",
+  video: "Time Capsule",
   photos: "Photos",
   advice: "Advice",
   questionnaire: "Questionnaire",
   complete: "Thank You",
 };
+
+/** Steps shown in the progress indicator (excludes welcome). */
+export const FLOW_STEPS = GUEST_STEPS.filter((s) => s !== "welcome");
 
 export const LOCAL_STORAGE_GUEST_TOKEN_KEY = "henna_guest_token";
 
@@ -45,25 +48,7 @@ export const PHOTOS_BUCKET = "photos";
 
 export const VIDEOS_BUCKET = "videos";
 
-/** Static questionnaire — IDs must match vote.question_id in the database. */
-export const QUESTIONNAIRE: Array<{
-  id: number;
-  question_text: string;
-  options: string[];
-}> = [
-  {
-    id: 1,
-    question_text: "Best marriage advice in one word?",
-    options: ["Patience", "Communication", "Trust", "Laughter"],
-  },
-  {
-    id: 2,
-    question_text: "Ideal honeymoon destination?",
-    options: ["Beach", "Mountains", "City break", "Staycation"],
-  },
-  {
-    id: 3,
-    question_text: "Who will win every argument?",
-    options: ["The bride", "The groom", "Neither", "Both simultaneously"],
-  },
-];
+export {
+  QUESTIONNAIRE,
+  QUESTIONNAIRE_QUESTION_COUNT,
+} from "@/lib/questionnaire/constants";

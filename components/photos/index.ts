@@ -1,2 +1,1 @@
-/** Photo capture/grid components — UI phase. */
-export {};
+export { PhotoUpload } from "./PhotoUpload";
