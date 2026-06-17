@@ -27,6 +27,9 @@ export const messages: Record<Locale, MessageTree> = {
     },
     welcome: {
       heroTitle: "ليلة حناء عائدة",
+      heroName: "عائدة",
+      heroTitlePrefix: "ليلة حناء",
+      heroTitleSuffix: "",
       title: "ليلة حناء عائدة",
       subtitle:
         "شكراً لكونكم جزءاً من هذه الاحتفالية. لكل ضيف تجربة فريدة — لنبدأ رحلتكم.",
@@ -154,6 +157,9 @@ export const messages: Record<Locale, MessageTree> = {
     },
     welcome: {
       heroTitle: "Ayda Henna Night",
+      heroName: "Ayda",
+      heroTitlePrefix: "",
+      heroTitleSuffix: "Henna Night",
       title: "Ayda Henna Night",
       subtitle:
         "Thank you for being part of this celebration. Each guest receives a unique experience — let's begin yours.",
@@ -168,12 +174,12 @@ export const messages: Record<Locale, MessageTree> = {
     dua: {
       title: "Your Unique Dua",
       subtitle:
-        "A prayer chosen just for you — may it bring barakah to the couple and to you.",
+        "A Duaa chosen just for you",
       loading: "Assigning your unique dua…",
       exhausted:
         "All duas have been shared tonight. Thank you for being part of this celebration.",
       loadError: "Could not load your dua.",
-      accept: "I accept this dua",
+      accept: "Ameen",
       accepting: "Accepting…",
     },
     video: {

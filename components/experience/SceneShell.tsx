@@ -11,7 +11,7 @@ import { StepIndicator } from "./StepIndicator";
 
 interface SceneShellProps {
   step: GuestStep;
-  title: string;
+  title?: ReactNode;
   subtitle?: string;
   children: ReactNode;
   footer?: ReactNode;

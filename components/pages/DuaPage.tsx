@@ -84,12 +84,12 @@ export function DuaPage() {
       <FlowLayout
         step="dua"
         title="Your Unique Dua"
-        subtitle="A prayer chosen just for you — may it bring barakah to the couple and to you."
+        subtitle="A Duaa chosen just for you!"
         footer={
           loadState === "ready" ? (
             <FlowNav
               backHref={STEP_ROUTES.welcome}
-              nextLabel={accepting ? "Accepting…" : "I accept this dua"}
+              nextLabel={accepting ? "Accepting…" : "Ameen"}
               onNext={handleAccept}
               nextHref={nextRoute("dua")}
               nextDisabled={!dua || accepting}

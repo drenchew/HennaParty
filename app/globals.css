@@ -28,12 +28,12 @@
   }
 
   [dir="rtl"] body.flow-body {
-    font-family: var(--font-arabic-body), "Amiri", "Noto Naskh Arabic", serif;
+    font-family: var(--font-arabic-body), "Mushym", serif;
     line-height: 1.75;
   }
 
   [dir="ltr"] body.flow-body {
-    font-family: var(--font-english), "Cormorant Garamond", Georgia, serif;
+    font-family: var(--font-english), "Bilderberg", Georgia, serif;
     line-height: 1.65;
   }
 }
@@ -69,12 +69,12 @@
   }
 
   [dir="rtl"] .flow-title {
-    font-family: var(--font-arabic-display), "Aref Ruqaa", "Amiri", serif;
+    font-family: var(--font-arabic-display), "Mushym", serif;
     @apply text-[1.65rem] font-bold leading-snug sm:text-3xl;
   }
 
   [dir="ltr"] .flow-title {
-    font-family: var(--font-english), "Cormorant Garamond", Georgia, serif;
+    font-family: var(--font-english), "Bilderberg", Georgia, serif;
   }
 
   .flow-subtitle {
@@ -209,7 +209,7 @@
 
   .flow-dua-arabic {
     @apply text-[1.35rem] font-bold leading-[2] sm:text-2xl;
-    font-family: var(--font-arabic-body), "Amiri", "Noto Naskh Arabic", serif;
+    font-family: var(--font-arabic-body), "Mushym", serif;
   }
 
   .flow-dua-translation {
@@ -306,11 +306,11 @@
   }
 
   [dir="rtl"] .flow-stats-title {
-    font-family: var(--font-arabic-display), "Aref Ruqaa", "Amiri", serif;
+    font-family: var(--font-arabic-display), "Mushym", serif;
   }
 
   [dir="ltr"] .flow-stats-title {
-    font-family: var(--font-english), "Cormorant Garamond", Georgia, serif;
+    font-family: var(--font-english), "Bilderberg", Georgia, serif;
   }
 
   .flow-stats {
@@ -429,11 +429,11 @@
   }
 
   [dir="rtl"] .thank-you-stat dd {
-    font-family: var(--font-arabic-display), "Aref Ruqaa", "Amiri", serif;
+    font-family: var(--font-arabic-display), "Mushym", serif;
   }
 
   [dir="ltr"] .thank-you-stat dd {
-    font-family: var(--font-english), "Cormorant Garamond", Georgia, serif;
+    font-family: var(--font-english), "Bilderberg", Georgia, serif;
   }
 
   .thank-you-stat-emoji {
@@ -450,12 +450,12 @@
   }
 
   [dir="rtl"] .thank-you-closing-text {
-    font-family: var(--font-arabic-display), "Aref Ruqaa", "Amiri", serif;
+    font-family: var(--font-arabic-display), "Mushym", serif;
     @apply text-2xl font-bold leading-relaxed;
   }
 
   [dir="ltr"] .thank-you-closing-text {
-    font-family: var(--font-english), "Cormorant Garamond", Georgia, serif;
+    font-family: var(--font-english), "Bilderberg", Georgia, serif;
   }
 
   .thank-you-closing-sub {
@@ -642,12 +642,12 @@
   }
 
   [dir="rtl"] .ornamental-btn {
-    font-family: var(--font-arabic-body), "Amiri", serif;
+    font-family: var(--font-arabic-body), "Mushym", serif;
     @apply text-base font-bold;
   }
 
   [dir="ltr"] .ornamental-btn {
-    font-family: var(--font-english), "Cormorant Garamond", Georgia, serif;
+    font-family: var(--font-english), "Bilderberg", Georgia, serif;
     @apply text-[0.95rem] font-semibold tracking-wide;
   }
 
@@ -730,7 +730,7 @@
   }
 
   [dir="rtl"] .experience-eyebrow {
-    font-family: var(--font-arabic-display), "Aref Ruqaa", "Amiri", serif;
+    font-family: var(--font-arabic-display), "Mushym", serif;
     @apply text-sm font-bold tracking-normal;
   }
 
@@ -739,12 +739,12 @@
   }
 
   [dir="rtl"] .experience-title {
-    font-family: var(--font-arabic-display), "Aref Ruqaa", "Amiri", serif;
+    font-family: var(--font-arabic-display), "Mushym", serif;
     @apply text-[1.75rem] font-bold leading-snug sm:text-3xl;
   }
 
   [dir="ltr"] .experience-title {
-    font-family: var(--font-english), "Cormorant Garamond", Georgia, serif;
+    font-family: var(--font-english), "Bilderberg", Georgia, serif;
     @apply sm:text-3xl;
   }
 
@@ -800,7 +800,7 @@
 
   .experience-dua-arabic {
     @apply text-[1.35rem] font-bold leading-[2] sm:text-[1.65rem];
-    font-family: var(--font-arabic-body), "Amiri", "Noto Naskh Arabic", serif;
+    font-family: var(--font-arabic-body), "Mushym", serif;
   }
 
   .experience-dua-translation {
@@ -821,12 +821,12 @@
   }
 
   [dir="rtl"] .experience-stats-title {
-    font-family: var(--font-arabic-display), "Aref Ruqaa", "Amiri", serif;
+    font-family: var(--font-arabic-display), "Mushym", serif;
     @apply text-xl font-bold;
   }
 
   [dir="ltr"] .experience-stats-title {
-    font-family: var(--font-english), "Cormorant Garamond", Georgia, serif;
+    font-family: var(--font-english), "Bilderberg", Georgia, serif;
   }
 
   .experience-steps__list {
@@ -863,11 +863,11 @@
 
   [dir="ltr"] .language-toggle {
     @apply uppercase tracking-[0.22em];
-    font-family: var(--font-english), "Cormorant Garamond", Georgia, serif;
+    font-family: var(--font-english), "Bilderberg", Georgia, serif;
   }
 
   [dir="rtl"] .language-toggle {
-    font-family: var(--font-arabic-body), "Amiri", serif;
+    font-family: var(--font-arabic-body), "Mushym", serif;
     @apply text-xs tracking-normal;
   }
 
@@ -913,13 +913,182 @@
   }
 
   [dir="rtl"] .welcome-hero-title {
-    font-family: var(--font-arabic-display), "Aref Ruqaa", "Amiri", serif;
+    font-family: var(--font-arabic-display), "Mushym", serif;
     @apply text-[2.1rem] font-bold sm:text-[2.5rem];
   }
 
   [dir="ltr"] .welcome-hero-title {
-    font-family: var(--font-english), "Cormorant Garamond", Georgia, serif;
+    font-family: var(--font-english), "Bilderberg", Georgia, serif;
     @apply font-semibold tracking-wide sm:text-[2.5rem];
+  }
+
+  .welcome-hero-name-wrap {
+    @apply relative inline-block;
+    isolation: isolate;
+  }
+
+  .welcome-hero-name {
+    @apply relative z-[1];
+    background: linear-gradient(
+      180deg,
+      #fff8e7 0%,
+      #ffe08a 18%,
+      var(--henna-gold) 42%,
+      #ff9a4a 68%,
+      #ff5c2e 88%,
+      #ffd070 100%
+    );
+    background-size: 100% 220%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: welcome-name-fire 2.2s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 10px rgba(255, 160, 60, 0.55))
+      drop-shadow(0 0 22px rgba(255, 90, 40, 0.35));
+  }
+
+  .welcome-hero-name__sparkles {
+    @apply pointer-events-none absolute inset-0 overflow-visible;
+    inset: -0.2em -0.15em -0.35em;
+  }
+
+  .welcome-hero-name__spark {
+    @apply absolute bottom-0 block rounded-full;
+    --spark-drift: 6px;
+    width: 3px;
+    height: 3px;
+    background: radial-gradient(circle, #fff6d0 0%, #ffb040 55%, transparent 100%);
+    box-shadow: 0 0 5px #ffcc66, 0 0 10px #ff7030;
+    opacity: 0;
+    animation: welcome-name-spark 1.6s ease-out infinite;
+  }
+
+  .welcome-hero-name__spark::after {
+    content: "";
+    @apply absolute block;
+    width: 1px;
+    height: 1px;
+    top: -2px;
+    left: 1px;
+    background: #fffbe8;
+    box-shadow: 0 0 4px #fff8c0;
+  }
+
+  .welcome-hero-name__spark[data-i="0"] {
+    left: 8%;
+    animation-delay: 0s;
+    animation-duration: 1.5s;
+  }
+  .welcome-hero-name__spark[data-i="1"] {
+    left: 18%;
+    animation-delay: 0.35s;
+    animation-duration: 1.8s;
+  }
+  .welcome-hero-name__spark[data-i="2"] {
+    left: 28%;
+    animation-delay: 0.7s;
+    width: 2px;
+    height: 2px;
+  }
+  .welcome-hero-name__spark[data-i="3"] {
+    left: 38%;
+    animation-delay: 0.15s;
+    animation-duration: 2s;
+  }
+  .welcome-hero-name__spark[data-i="4"] {
+    left: 48%;
+    animation-delay: 0.55s;
+  }
+  .welcome-hero-name__spark[data-i="5"] {
+    left: 58%;
+    animation-delay: 0.9s;
+    animation-duration: 1.7s;
+  }
+  .welcome-hero-name__spark[data-i="6"] {
+    left: 68%;
+    animation-delay: 0.25s;
+    width: 2px;
+    height: 2px;
+  }
+  .welcome-hero-name__spark[data-i="7"] {
+    left: 78%;
+    animation-delay: 0.65s;
+    animation-duration: 1.9s;
+  }
+  .welcome-hero-name__spark[data-i="8"] {
+    left: 88%;
+    animation-delay: 1s;
+  }
+  .welcome-hero-name__spark[data-i="9"] {
+    left: 14%;
+    animation-delay: 1.2s;
+    animation-duration: 2.1s;
+  }
+  .welcome-hero-name__spark[data-i="10"] {
+    left: 52%;
+    animation-delay: 1.35s;
+    width: 4px;
+    height: 4px;
+  }
+  .welcome-hero-name__spark[data-i="11"] {
+    left: 72%;
+    animation-delay: 0.45s;
+    animation-duration: 1.4s;
+  }
+  .welcome-hero-name__spark[data-i="12"] {
+    left: 32%;
+    animation-delay: 1.05s;
+    width: 2px;
+    height: 2px;
+  }
+  .welcome-hero-name__spark[data-i="13"] {
+    left: 92%;
+    animation-delay: 0.8s;
+    animation-duration: 1.65s;
+  }
+
+  @keyframes welcome-name-fire {
+    0% {
+      background-position: 50% 0%;
+      filter: drop-shadow(0 0 8px rgba(255, 180, 80, 0.5))
+        drop-shadow(0 0 18px rgba(255, 100, 40, 0.35));
+    }
+    100% {
+      background-position: 50% 100%;
+      filter: drop-shadow(0 0 14px rgba(255, 140, 50, 0.75))
+        drop-shadow(0 0 28px rgba(255, 70, 30, 0.5))
+        drop-shadow(0 0 40px rgba(212, 168, 83, 0.25));
+    }
+  }
+
+  @keyframes welcome-name-spark {
+    0% {
+      transform: translateY(0) translateX(0) scale(0.4);
+      opacity: 0;
+    }
+    12% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-1.4em) translateX(var(--spark-drift, 6px)) scale(0);
+      opacity: 0;
+    }
+  }
+
+  [dir="rtl"] .welcome-hero-name__spark {
+    --spark-drift: -6px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .welcome-hero-name {
+      animation: none;
+      background-position: 50% 50%;
+    }
+
+    .welcome-hero-name__spark {
+      animation: none;
+      opacity: 0;
+    }
   }
 
   .welcome-hero-subtitle {

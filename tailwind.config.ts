@@ -8,9 +8,9 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        arabic: ["var(--font-arabic-body)", "Amiri", "Noto Naskh Arabic", "serif"],
-        "arabic-display": ["var(--font-arabic-display)", "Aref Ruqaa", "Amiri", "serif"],
-        english: ["var(--font-english)", "Cormorant Garamond", "Georgia", "serif"],
+        arabic: ["var(--font-arabic-body)", "Mushym", "serif"],
+        "arabic-display": ["var(--font-arabic-display)", "Mushym", "serif"],
+        english: ["var(--font-english)", "Bilderberg", "Georgia", "serif"],
       },
     },
   },

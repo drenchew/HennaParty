@@ -1,25 +1,35 @@
-import { Amiri, Aref_Ruqaa, Cormorant_Garamond } from "next/font/google";
+import localFont from "next/font/local";
 
-/** Classical Naskh — readable Arabic body, duas, and UI copy. */
-export const fontArabicBody = Amiri({
-  subsets: ["arabic", "latin"],
-  weight: ["400", "700"],
+/** Mushym — Arabic body, UI, and duas. */
+export const fontArabicBody = localFont({
+  src: "../public/fonts/Mushym-Regular.ttf",
   variable: "--font-arabic-body",
   display: "swap",
+  weight: "400",
 });
 
-/** Ruqaa-inspired display face — ceremonial titles and eyebrows in Arabic. */
-export const fontArabicDisplay = Aref_Ruqaa({
-  subsets: ["arabic", "latin"],
-  weight: ["400", "700"],
+/** Mushym — ceremonial Arabic titles and eyebrows. */
+export const fontArabicDisplay = localFont({
+  src: "../public/fonts/Mushym-Regular.ttf",
   variable: "--font-arabic-display",
   display: "swap",
+  weight: "400",
 });
 
-/** Warm serif for English — pairs with gold/cream henna palette. */
-export const fontEnglish = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+/** Bilderberg — English titles and body copy. */
+export const fontEnglish = localFont({
+  src: [
+    {
+      path: "../public/fonts/Bilderberg OTF.otf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/Bilderberg Italic OTF.otf",
+      weight: "400",
+      style: "italic",
+    },
+  ],
   variable: "--font-english",
   display: "swap",
 });
