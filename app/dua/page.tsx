@@ -1,6 +1,5 @@
-import { DuaPage } from "@/components/pages/DuaPage";
+import { redirect } from "next/navigation";
 
-/** Step 2 — Unique dua assignment and acceptance. */
-export default function Page() {
-  return <DuaPage />;
+export default function DuaPage() {
+  redirect("/experience");
 }

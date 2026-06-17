@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BackgroundLayout } from "@/components/layout/BackgroundLayout";
 import { FlowProvider } from "@/components/providers/FlowProvider";
 import "./globals.css";
 
@@ -16,7 +17,9 @@ export default function RootLayout({
     <html lang="en">
       <body className="flow-body">
         <FlowProvider>
-          <div className="flow-app">{children}</div>
+          <BackgroundLayout>
+            <div className="flow-app experience-app">{children}</div>
+          </BackgroundLayout>
         </FlowProvider>
       </body>
     </html>

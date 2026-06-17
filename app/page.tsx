@@ -1,6 +1,6 @@
-import { WelcomePage } from "@/components/pages/WelcomePage";
+import { redirect } from "next/navigation";
 
-/** Step 1 — Welcome: entry point, starts guest session. */
+/** Legacy route — guest journey lives at /experience. */
 export default function Page() {
-  return <WelcomePage />;
+  redirect("/experience");
 }

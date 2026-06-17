@@ -1,6 +1,5 @@
-import { ThankYouPage } from "@/components/pages/ThankYouPage";
+import { redirect } from "next/navigation";
 
-/** Step 7 — Final thank you with event statistics. */
-export default function Page() {
-  return <ThankYouPage />;
+export default function ThankYouPage() {
+  redirect("/experience");
 }

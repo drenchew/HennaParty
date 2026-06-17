@@ -1,6 +1,5 @@
-import { PhotosPage } from "@/components/pages/PhotosPage";
+import { redirect } from "next/navigation";
 
-/** Step 4 — Upload up to 3 photos (camera or gallery). */
-export default function Page() {
-  return <PhotosPage />;
+export default function PhotosPage() {
+  redirect("/experience");
 }

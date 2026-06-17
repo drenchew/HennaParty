@@ -1,6 +1,5 @@
-import { AdvicePage } from "@/components/pages/AdvicePage";
+import { redirect } from "next/navigation";
 
-/** Step 5 — Leave advice/message for the couple. */
-export default function Page() {
-  return <AdvicePage />;
+export default function AdvicePage() {
+  redirect("/experience");
 }

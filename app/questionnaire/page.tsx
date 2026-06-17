@@ -1,6 +1,5 @@
-import { QuestionnairePage } from "@/components/pages/QuestionnairePage";
+import { redirect } from "next/navigation";
 
-/** Step 6 — Marriage-themed multiple-choice questionnaire. */
-export default function Page() {
-  return <QuestionnairePage />;
+export default function QuestionnairePage() {
+  redirect("/experience");
 }

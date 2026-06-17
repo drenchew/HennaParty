@@ -11,15 +11,15 @@ export const GUEST_STEPS = [
 
 export type GuestStep = (typeof GUEST_STEPS)[number];
 
-/** Route path for each step (complete → thank-you page). */
+/** Route path for each step (legacy multi-page routes redirect to /experience). */
 export const STEP_ROUTES: Record<GuestStep, string> = {
-  welcome: "/",
-  dua: "/dua",
-  video: "/video",
-  photos: "/photos",
-  advice: "/advice",
-  questionnaire: "/questionnaire",
-  complete: "/thank-you",
+  welcome: "/experience",
+  dua: "/experience",
+  video: "/experience",
+  photos: "/experience",
+  advice: "/experience",
+  questionnaire: "/experience",
+  complete: "/experience",
 };
 
 /** Human-readable labels for the progress stepper. */

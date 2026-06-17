@@ -5,25 +5,35 @@
 :root {
   --henna-bg: #1a0f12;
   --henna-surface: #2a1619;
+  --henna-cream: #faf3eb;
+  --henna-cream-soft: rgba(250, 243, 235, 0.12);
+  --henna-red: #8b3a32;
   --henna-accent: #c9785c;
   --henna-gold: #d4a853;
   --henna-text: #faf3eb;
   --henna-muted: #c4b0a5;
   --henna-success: #7cb87c;
   --henna-error: #e07a7a;
+  --henna-glass: rgba(26, 15, 18, 0.62);
+  --henna-glass-border: rgba(212, 168, 83, 0.22);
+  --henna-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
 }
 
 @layer base {
   body.flow-body {
-    @apply min-h-screen antialiased;
-    background: radial-gradient(ellipse at top, #3d1f24 0%, var(--henna-bg) 55%);
+    @apply min-h-screen antialiased overflow-x-hidden;
+    background: var(--henna-bg);
     color: var(--henna-text);
   }
 }
 
 @layer components {
   .flow-app {
-    @apply mx-auto flex min-h-screen max-w-lg flex-col px-4 py-6 sm:px-6;
+    @apply relative mx-auto flex min-h-screen w-full max-w-[420px] flex-col px-4 py-4 sm:px-5;
+  }
+
+  .experience-app {
+    @apply max-w-[420px];
   }
 
   .flow-page {
@@ -58,8 +68,9 @@
 
   .flow-card {
     @apply rounded-2xl border p-5;
-    background: color-mix(in srgb, var(--henna-surface) 90%, black);
-    border-color: color-mix(in srgb, var(--henna-accent) 30%, transparent);
+    background: var(--henna-cream-soft);
+    border-color: var(--henna-glass-border);
+    box-shadow: var(--henna-shadow);
   }
 
   .flow-stack {
@@ -93,12 +104,19 @@
   }
 
   .flow-btn {
-    @apply w-full rounded-full px-6 py-3 text-sm font-semibold transition;
+    @apply w-full px-6 py-3 text-sm font-semibold transition;
+    clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px);
   }
 
   .flow-btn--primary {
-    background: linear-gradient(135deg, var(--henna-accent), var(--henna-gold));
+    background: linear-gradient(135deg, var(--henna-red), var(--henna-accent) 45%, var(--henna-gold));
     color: var(--henna-bg);
+    box-shadow: 0 0 0 1px rgba(212, 168, 83, 0.35), var(--henna-shadow);
+  }
+
+  .flow-btn--primary:hover:not(:disabled) {
+    transform: scale(1.02);
+    box-shadow: 0 0 18px rgba(212, 168, 83, 0.35), var(--henna-shadow);
   }
 
   .flow-btn--primary:disabled {
@@ -107,17 +125,17 @@
 
   .flow-btn--secondary {
     @apply border;
-    border-color: color-mix(in srgb, var(--henna-accent) 40%, transparent);
+    border-color: color-mix(in srgb, var(--henna-gold) 45%, transparent);
     color: var(--henna-text);
-    background: transparent;
+    background: var(--henna-cream-soft);
   }
 
   .flow-nav {
-    @apply flex flex-col gap-3 sm:flex-row;
+    @apply flex flex-col gap-3;
   }
 
   .flow-nav .flow-btn--secondary {
-    @apply sm:w-auto sm:min-w-[7rem];
+    @apply min-w-[7rem];
   }
 
   .flow-stepper {
@@ -376,5 +394,271 @@
   .thank-you-closing-sub {
     @apply text-sm leading-relaxed;
     color: var(--henna-muted);
+  }
+
+  /* ─── Background layout ─── */
+  .henna-bg-root {
+    @apply relative min-h-screen w-full;
+  }
+
+  .henna-bg-layer {
+    @apply pointer-events-none fixed inset-0 -z-20;
+    background-image:
+      linear-gradient(rgba(13, 7, 8, 0.55), rgba(13, 7, 8, 0.55)),
+      url("/backgrounds/henna-mobile.webp"),
+      url("/backgrounds/henna-ornament.svg");
+    background-size: cover, cover, cover;
+    background-position: center, center, center;
+    filter: blur(1px) saturate(0.85);
+    transform: scale(1.04);
+  }
+
+  .henna-bg-overlay {
+    @apply pointer-events-none fixed inset-x-0 -z-10 h-40;
+  }
+
+  .henna-bg-overlay--top {
+    top: 0;
+    background: linear-gradient(to bottom, rgba(13, 7, 8, 0.85), transparent);
+  }
+
+  .henna-bg-overlay--bottom {
+    bottom: 0;
+    background: linear-gradient(to top, rgba(13, 7, 8, 0.9), transparent);
+  }
+
+  .henna-bg-vignette {
+    @apply pointer-events-none fixed inset-0 -z-10;
+    background: radial-gradient(ellipse at center, transparent 35%, rgba(13, 7, 8, 0.65) 100%);
+  }
+
+  .henna-bg-content {
+    @apply relative z-0 min-h-screen;
+  }
+
+  /* ─── Ornamental design system ─── */
+  .ornamental-card {
+    @apply relative;
+    background: var(--henna-cream-soft);
+    border: 1px solid var(--henna-glass-border);
+    box-shadow: var(--henna-shadow);
+    clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 14px);
+  }
+
+  .ornamental-card__inner {
+    @apply relative z-[1] p-5;
+  }
+
+  .ornament-frame {
+    @apply relative p-6 text-center;
+    border: 1px solid color-mix(in srgb, var(--henna-gold) 35%, transparent);
+    background: color-mix(in srgb, var(--henna-bg) 35%, transparent);
+  }
+
+  .ornament-frame--ceremonial {
+    box-shadow: inset 0 0 0 1px rgba(212, 168, 83, 0.12), var(--henna-shadow);
+  }
+
+  .ornament-frame__inner {
+    @apply relative z-[1];
+  }
+
+  .ornament-corner {
+    @apply pointer-events-none absolute text-[var(--henna-gold)];
+  }
+
+  .ornament-corner--tl {
+    @apply left-2 top-2;
+  }
+
+  .ornament-corner--tr {
+    @apply right-2 top-2 rotate-90;
+  }
+
+  .ornament-corner--bl {
+    @apply bottom-2 left-2 -rotate-90;
+  }
+
+  .ornament-corner--br {
+    @apply bottom-2 right-2 rotate-180;
+  }
+
+  .ornament-divider {
+    @apply flex items-center gap-3 py-2;
+  }
+
+  .ornament-divider__line {
+    @apply h-px flex-1;
+    background: linear-gradient(90deg, transparent, var(--henna-gold), transparent);
+    opacity: 0.55;
+  }
+
+  .ornament-divider__motif,
+  .ornament-divider__label {
+    @apply shrink-0 text-xs tracking-[0.2em];
+    color: var(--henna-gold);
+  }
+
+  .ornamental-btn {
+    @apply relative inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold transition duration-300;
+    clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px);
+  }
+
+  .ornamental-btn--full {
+    @apply w-full;
+  }
+
+  .ornamental-btn--primary {
+    color: var(--henna-bg);
+    background: linear-gradient(135deg, var(--henna-red), var(--henna-accent) 50%, var(--henna-gold));
+    box-shadow: 0 0 0 1px rgba(212, 168, 83, 0.35);
+  }
+
+  .ornamental-btn--primary:hover:not(:disabled) {
+    transform: scale(1.02);
+    box-shadow: 0 0 20px rgba(201, 120, 92, 0.35), 0 0 0 1px rgba(212, 168, 83, 0.5);
+  }
+
+  .ornamental-btn--secondary {
+    color: var(--henna-text);
+    background: var(--henna-cream-soft);
+    border: 1px solid color-mix(in srgb, var(--henna-gold) 40%, transparent);
+  }
+
+  .ornamental-btn--ghost {
+    color: var(--henna-muted);
+    background: transparent;
+    border: 1px solid transparent;
+  }
+
+  .ornamental-btn:disabled {
+    @apply cursor-not-allowed opacity-40;
+  }
+
+  .ornamental-btn__edge {
+    @apply hidden;
+  }
+
+  /* ─── Cinematic experience ─── */
+  .experience-scroll {
+    @apply relative h-[100dvh] overflow-hidden;
+  }
+
+  .experience-scene-motion {
+    @apply h-full;
+  }
+
+  .experience-scene {
+    @apply flex h-[100dvh] items-center justify-center px-1;
+  }
+
+  .experience-glass {
+    @apply flex max-h-[92dvh] w-full flex-col gap-4 overflow-y-auto px-3 py-5;
+    background: var(--henna-glass);
+    border: 1px solid var(--henna-glass-border);
+    box-shadow: var(--henna-shadow);
+    backdrop-filter: blur(10px);
+    clip-path: polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px);
+  }
+
+  .experience-glass--framed {
+    box-shadow: inset 0 0 0 1px rgba(212, 168, 83, 0.08), var(--henna-shadow);
+  }
+
+  .experience-header {
+    @apply space-y-3 text-center;
+  }
+
+  .experience-eyebrow {
+    @apply text-[11px] uppercase tracking-[0.28em];
+    color: var(--henna-gold);
+  }
+
+  .experience-title {
+    @apply text-2xl font-semibold leading-tight;
+    font-family: Georgia, "Times New Roman", serif;
+  }
+
+  .experience-subtitle {
+    @apply text-sm leading-relaxed;
+    color: var(--henna-muted);
+  }
+
+  .experience-body {
+    @apply flex-1;
+  }
+
+  .experience-footer {
+    @apply pt-1;
+  }
+
+  .experience-nav {
+    @apply flex flex-col gap-3;
+  }
+
+  .experience-copy {
+    @apply text-sm leading-relaxed;
+  }
+
+  .experience-meta {
+    @apply mt-3 text-xs;
+    color: var(--henna-muted);
+  }
+
+  .experience-meta--top {
+    @apply mt-4 border-t pt-4;
+    border-color: color-mix(in srgb, var(--henna-gold) 20%, transparent);
+  }
+
+  .experience-stack {
+    @apply flex flex-col gap-4;
+  }
+
+  .experience-loading {
+    @apply text-center text-sm;
+    color: var(--henna-muted);
+  }
+
+  .experience-error {
+    color: var(--henna-error);
+    @apply text-sm;
+  }
+
+  .experience-success {
+    color: var(--henna-success);
+    @apply text-sm leading-relaxed;
+  }
+
+  .experience-dua-arabic {
+    @apply text-xl leading-loose sm:text-2xl;
+    font-family: Georgia, "Times New Roman", serif;
+  }
+
+  .experience-dua-translation {
+    @apply mt-4 text-sm italic leading-relaxed;
+    color: var(--henna-muted);
+  }
+
+  .experience-stats-title {
+    @apply mb-4 text-lg font-medium;
+  }
+
+  .experience-steps__list {
+    @apply flex items-center justify-center gap-2;
+  }
+
+  .experience-steps__dot {
+    @apply block h-2.5 w-2.5;
+    background: color-mix(in srgb, var(--henna-muted) 40%, transparent);
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  }
+
+  .experience-steps__item[data-status="current"] .experience-steps__dot {
+    background: var(--henna-gold);
+    box-shadow: 0 0 10px rgba(212, 168, 83, 0.45);
+  }
+
+  .experience-steps__item[data-status="complete"] .experience-steps__dot {
+    background: var(--henna-accent);
   }
 }

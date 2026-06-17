@@ -1,5 +1,5 @@
-import { VideoPage } from "@/components/pages/VideoPage";
+import { redirect } from "next/navigation";
 
-export default function Page() {
-  return <VideoPage />;
+export default function VideoPage() {
+  redirect("/experience");
 }
