@@ -8,9 +8,9 @@ export function AtmosphereLayer() {
   return (
     <div className="atmosphere-layer" aria-hidden>
       <div className="atmosphere-gradient" />
-      <GoldDustParticles />
       <div className="atmosphere-vignette" />
       <div className="atmosphere-grain" />
+      <GoldDustParticles />
     </div>
   );
 }

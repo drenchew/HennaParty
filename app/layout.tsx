@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { BackgroundLayout } from "@/components/layout/BackgroundLayout";
 import { FlowProvider } from "@/components/providers/FlowProvider";
 import { LocaleProvider } from "@/components/providers/LocaleProvider";
+import { fontVariables } from "@/lib/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -16,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning>
-      <body className="flow-body">
+      <body className={`${fontVariables} flow-body`}>
         <LocaleProvider>
           <FlowProvider>
             <BackgroundLayout>

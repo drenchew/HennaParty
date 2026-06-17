@@ -21,9 +21,20 @@
 
 @layer base {
   body.flow-body {
-    @apply min-h-screen antialiased overflow-x-hidden;
+    @apply min-h-screen overflow-x-hidden antialiased;
     background: var(--henna-bg);
     color: var(--henna-text);
+    font-feature-settings: "kern" 1, "liga" 1;
+  }
+
+  [dir="rtl"] body.flow-body {
+    font-family: var(--font-arabic-body), "Amiri", "Noto Naskh Arabic", serif;
+    line-height: 1.75;
+  }
+
+  [dir="ltr"] body.flow-body {
+    font-family: var(--font-english), "Cormorant Garamond", Georgia, serif;
+    line-height: 1.65;
   }
 }
 
@@ -45,12 +56,25 @@
   }
 
   .flow-eyebrow {
-    @apply text-xs uppercase tracking-[0.25em];
+    @apply text-xs tracking-[0.25em];
     color: var(--henna-gold);
+  }
+
+  [dir="ltr"] .flow-eyebrow {
+    @apply uppercase;
   }
 
   .flow-title {
     @apply text-2xl font-semibold leading-tight sm:text-3xl;
+  }
+
+  [dir="rtl"] .flow-title {
+    font-family: var(--font-arabic-display), "Aref Ruqaa", "Amiri", serif;
+    @apply text-[1.65rem] font-bold leading-snug sm:text-3xl;
+  }
+
+  [dir="ltr"] .flow-title {
+    font-family: var(--font-english), "Cormorant Garamond", Georgia, serif;
   }
 
   .flow-subtitle {
@@ -184,12 +208,21 @@
   }
 
   .flow-dua-arabic {
-    @apply text-xl leading-loose sm:text-2xl;
+    @apply text-[1.35rem] font-bold leading-[2] sm:text-2xl;
+    font-family: var(--font-arabic-body), "Amiri", "Noto Naskh Arabic", serif;
   }
 
   .flow-dua-translation {
-    @apply mt-4 text-sm italic leading-relaxed;
+    @apply mt-4 text-sm leading-relaxed;
     color: var(--henna-muted);
+  }
+
+  [dir="rtl"] .flow-dua-translation {
+    @apply not-italic;
+  }
+
+  [dir="ltr"] .flow-dua-translation {
+    @apply italic;
   }
 
   .flow-upload {
@@ -238,6 +271,11 @@
     @apply w-full resize-none rounded-xl border bg-transparent p-3 text-sm outline-none focus:ring-2;
     border-color: color-mix(in srgb, var(--henna-accent) 35%, transparent);
     color: var(--henna-text);
+    font-family: inherit;
+  }
+
+  [dir="rtl"] .flow-textarea {
+    @apply text-base leading-loose;
   }
 
   .flow-question {
@@ -265,6 +303,14 @@
 
   .flow-stats-title {
     @apply mb-4 text-lg font-medium;
+  }
+
+  [dir="rtl"] .flow-stats-title {
+    font-family: var(--font-arabic-display), "Aref Ruqaa", "Amiri", serif;
+  }
+
+  [dir="ltr"] .flow-stats-title {
+    font-family: var(--font-english), "Cormorant Garamond", Georgia, serif;
   }
 
   .flow-stats {
@@ -369,13 +415,25 @@
   }
 
   .thank-you-stat dt {
-    @apply mb-2 flex flex-col items-center gap-1 text-xs uppercase tracking-wide;
+    @apply mb-2 flex flex-col items-center gap-1 text-xs tracking-wide;
     color: var(--henna-muted);
+  }
+
+  [dir="ltr"] .thank-you-stat dt {
+    @apply uppercase;
   }
 
   .thank-you-stat dd {
     @apply text-3xl font-semibold tabular-nums;
     color: var(--henna-gold);
+  }
+
+  [dir="rtl"] .thank-you-stat dd {
+    font-family: var(--font-arabic-display), "Aref Ruqaa", "Amiri", serif;
+  }
+
+  [dir="ltr"] .thank-you-stat dd {
+    font-family: var(--font-english), "Cormorant Garamond", Georgia, serif;
   }
 
   .thank-you-stat-emoji {
@@ -387,8 +445,17 @@
   }
 
   .thank-you-closing-text {
-    @apply text-xl font-medium leading-snug sm:text-2xl;
+    @apply text-xl font-semibold leading-snug sm:text-2xl;
     color: var(--henna-gold);
+  }
+
+  [dir="rtl"] .thank-you-closing-text {
+    font-family: var(--font-arabic-display), "Aref Ruqaa", "Amiri", serif;
+    @apply text-2xl font-bold leading-relaxed;
+  }
+
+  [dir="ltr"] .thank-you-closing-text {
+    font-family: var(--font-english), "Cormorant Garamond", Georgia, serif;
   }
 
   .thank-you-closing-sub {
@@ -404,12 +471,12 @@
   .henna-bg-layer {
     @apply pointer-events-none fixed inset-0 -z-20;
     background-image:
-      linear-gradient(rgba(13, 7, 8, 0.55), rgba(13, 7, 8, 0.55)),
+      linear-gradient(rgba(13, 7, 8, 0.48), rgba(13, 7, 8, 0.62)),
       url("/backgrounds/henna-mobile.png"),
       url("/backgrounds/henna-ornament.svg");
     background-size: cover, cover, cover;
     background-position: center, center, center;
-    filter: blur(1px) saturate(0.85);
+    filter: blur(0.5px) saturate(0.9) brightness(0.88);
     transform: scale(1.04);
   }
 
@@ -438,7 +505,7 @@
   }
 
   .atmosphere-gradient {
-    @apply absolute inset-0;
+    @apply absolute inset-0 z-0;
     opacity: 0.045;
     background: linear-gradient(
       135deg,
@@ -450,13 +517,15 @@
   }
 
   .atmosphere-particles {
-    @apply absolute inset-0 h-full w-full;
-    opacity: 0.85;
-    mix-blend-mode: screen;
+    @apply absolute inset-0 z-[3] h-full w-full;
+    opacity: 1;
+    /* screen blend vanishes on bright custom PNG backgrounds */
+    mix-blend-mode: normal;
+    pointer-events: none;
   }
 
   .atmosphere-vignette {
-    @apply absolute inset-0;
+    @apply absolute inset-0 z-[1];
     background: radial-gradient(
       ellipse at center,
       transparent 42%,
@@ -466,7 +535,7 @@
   }
 
   .atmosphere-grain {
-    @apply absolute inset-0 opacity-[0.035];
+    @apply absolute inset-0 z-[2] opacity-[0.035];
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
     background-repeat: repeat;
     background-size: 180px 180px;
@@ -568,8 +637,18 @@
   }
 
   .ornamental-btn {
-    @apply relative inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold transition duration-300;
+    @apply relative inline-flex items-center justify-center gap-2 px-6 py-3 transition duration-300;
     clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px);
+  }
+
+  [dir="rtl"] .ornamental-btn {
+    font-family: var(--font-arabic-body), "Amiri", serif;
+    @apply text-base font-bold;
+  }
+
+  [dir="ltr"] .ornamental-btn {
+    font-family: var(--font-english), "Cormorant Garamond", Georgia, serif;
+    @apply text-[0.95rem] font-semibold tracking-wide;
   }
 
   .ornamental-btn--full {
@@ -638,13 +717,31 @@
   }
 
   .experience-eyebrow {
-    @apply text-[11px] uppercase tracking-[0.28em];
+    @apply text-[11px] tracking-[0.2em];
     color: var(--henna-gold);
+  }
+
+  [dir="ltr"] .experience-eyebrow {
+    @apply uppercase tracking-[0.28em];
+  }
+
+  [dir="rtl"] .experience-eyebrow {
+    font-family: var(--font-arabic-display), "Aref Ruqaa", "Amiri", serif;
+    @apply text-sm font-bold tracking-normal;
   }
 
   .experience-title {
     @apply text-2xl font-semibold leading-tight;
-    font-family: Georgia, "Times New Roman", serif;
+  }
+
+  [dir="rtl"] .experience-title {
+    font-family: var(--font-arabic-display), "Aref Ruqaa", "Amiri", serif;
+    @apply text-[1.75rem] font-bold leading-snug sm:text-3xl;
+  }
+
+  [dir="ltr"] .experience-title {
+    font-family: var(--font-english), "Cormorant Garamond", Georgia, serif;
+    @apply sm:text-3xl;
   }
 
   .experience-subtitle {
@@ -698,17 +795,34 @@
   }
 
   .experience-dua-arabic {
-    @apply text-xl leading-loose sm:text-2xl;
-    font-family: Georgia, "Times New Roman", serif;
+    @apply text-[1.35rem] font-bold leading-[2] sm:text-[1.65rem];
+    font-family: var(--font-arabic-body), "Amiri", "Noto Naskh Arabic", serif;
   }
 
   .experience-dua-translation {
-    @apply mt-4 text-sm italic leading-relaxed;
+    @apply mt-4 text-sm leading-relaxed;
     color: var(--henna-muted);
+  }
+
+  [dir="rtl"] .experience-dua-translation {
+    @apply text-right not-italic;
+  }
+
+  [dir="ltr"] .experience-dua-translation {
+    @apply italic;
   }
 
   .experience-stats-title {
     @apply mb-4 text-lg font-medium;
+  }
+
+  [dir="rtl"] .experience-stats-title {
+    font-family: var(--font-arabic-display), "Aref Ruqaa", "Amiri", serif;
+    @apply text-xl font-bold;
+  }
+
+  [dir="ltr"] .experience-stats-title {
+    font-family: var(--font-english), "Cormorant Garamond", Georgia, serif;
   }
 
   .experience-steps__list {
@@ -731,7 +845,7 @@
   }
 
   .language-toggle {
-    @apply absolute end-3 top-3 z-10 border px-3 py-1.5 text-[11px] font-medium uppercase tracking-wider transition;
+    @apply absolute end-3 top-3 z-10 border px-3 py-1.5 text-[11px] font-semibold transition;
     border-color: color-mix(in srgb, var(--henna-gold) 45%, transparent);
     color: var(--henna-gold);
     background: color-mix(in srgb, var(--henna-bg) 55%, transparent);
@@ -742,7 +856,13 @@
     box-shadow: 0 0 12px rgba(212, 168, 83, 0.25);
   }
 
-  [dir="rtl"] .experience-dua-translation {
-    @apply text-right;
+  [dir="ltr"] .language-toggle {
+    @apply uppercase tracking-wider;
+    font-family: var(--font-english), "Cormorant Garamond", Georgia, serif;
+  }
+
+  [dir="rtl"] .language-toggle {
+    font-family: var(--font-arabic-body), "Amiri", serif;
+    @apply text-xs tracking-normal;
   }
 }

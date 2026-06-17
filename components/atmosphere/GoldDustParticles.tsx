@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-const COLORS = ["#D8B56A", "#C8A96A", "#E8D4A8", "#B89858"] as const;
+const COLORS = ["#E8C872", "#D8B56A", "#C8A96A", "#F0E0B0", "#B89858"] as const;
 
 interface Particle {
   x: number;
@@ -42,8 +42,8 @@ function createParticle(width: number, height: number): Particle {
   return {
     x: Math.random() * width,
     y: Math.random() * height,
-    size: randomBetween(1, 3),
-    opacity: randomBetween(0.05, 0.14),
+    size: randomBetween(1.2, 3.5),
+    opacity: randomBetween(0.12, 0.28),
     opacitySpeed: randomBetween(0.0004, 0.0012),
     opacityPhase: Math.random() * Math.PI * 2,
     driftX: randomBetween(-0.08, 0.08),
@@ -126,15 +126,22 @@ export function GoldDustParticles() {
 
         particle.opacityPhase += particle.opacitySpeed * speedScale;
         const fade = 0.5 + 0.5 * Math.sin(particle.opacityPhase);
-        const alpha = Math.min(0.2, particle.opacity * (0.65 + fade * 0.35));
+        const alpha = Math.min(0.42, particle.opacity * (0.7 + fade * 0.3));
 
         context!.save();
-        context!.globalAlpha = alpha;
+        context!.globalCompositeOperation = "source-over";
+        context!.globalAlpha = alpha * 0.35;
         context!.fillStyle = particle.color;
         context!.shadowColor = particle.color;
-        context!.shadowBlur = particle.size * 2.5;
+        context!.shadowBlur = particle.size * 5;
         context!.beginPath();
-        context!.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+        context!.arc(particle.x, particle.y, particle.size * 1.4, 0, Math.PI * 2);
+        context!.fill();
+
+        context!.globalAlpha = alpha;
+        context!.shadowBlur = particle.size * 2;
+        context!.beginPath();
+        context!.arc(particle.x, particle.y, particle.size * 0.55, 0, Math.PI * 2);
         context!.fill();
         context!.restore();
 

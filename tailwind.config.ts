@@ -6,7 +6,13 @@ const config: Config = {
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        arabic: ["var(--font-arabic-body)", "Amiri", "Noto Naskh Arabic", "serif"],
+        "arabic-display": ["var(--font-arabic-display)", "Aref Ruqaa", "Amiri", "serif"],
+        english: ["var(--font-english)", "Cormorant Garamond", "Georgia", "serif"],
+      },
+    },
   },
   plugins: [],
 };
