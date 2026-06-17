@@ -712,6 +712,10 @@
     box-shadow: inset 0 0 0 1px rgba(212, 168, 83, 0.08), var(--henna-shadow);
   }
 
+  .experience-toolbar {
+    @apply flex shrink-0 justify-center pb-2;
+  }
+
   .experience-header {
     @apply space-y-3 text-center;
   }
@@ -845,24 +849,116 @@
   }
 
   .language-toggle {
-    @apply absolute end-3 top-3 z-10 border px-3 py-1.5 text-[11px] font-semibold transition;
+    @apply shrink-0 border px-3 py-1.5 text-[11px] font-semibold transition;
     border-color: color-mix(in srgb, var(--henna-gold) 45%, transparent);
     color: var(--henna-gold);
-    background: color-mix(in srgb, var(--henna-bg) 55%, transparent);
+    background: color-mix(in srgb, var(--henna-bg) 72%, transparent);
     clip-path: polygon(6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px), 0 6px);
   }
 
   .language-toggle:hover {
-    box-shadow: 0 0 12px rgba(212, 168, 83, 0.25);
+    box-shadow: 0 0 14px rgba(212, 168, 83, 0.3);
+    border-color: color-mix(in srgb, var(--henna-gold) 65%, transparent);
   }
 
   [dir="ltr"] .language-toggle {
-    @apply uppercase tracking-wider;
+    @apply uppercase tracking-[0.22em];
     font-family: var(--font-english), "Cormorant Garamond", Georgia, serif;
   }
 
   [dir="rtl"] .language-toggle {
     font-family: var(--font-arabic-body), "Amiri", serif;
     @apply text-xs tracking-normal;
+  }
+
+  .language-toggle-bar {
+    @apply flex max-w-full items-center justify-center gap-2;
+  }
+
+  .language-toggle-bar__line {
+    @apply h-px w-6 sm:w-10;
+    background: linear-gradient(
+      to right,
+      transparent,
+      color-mix(in srgb, var(--henna-gold) 50%, transparent)
+    );
+  }
+
+  .language-toggle-bar__line:last-of-type {
+    background: linear-gradient(
+      to left,
+      transparent,
+      color-mix(in srgb, var(--henna-gold) 50%, transparent)
+    );
+  }
+
+  .language-toggle-bar__gem {
+    @apply shrink-0 text-[10px] leading-none;
+    color: color-mix(in srgb, var(--henna-gold) 70%, transparent);
+  }
+
+  /* ─── Welcome hero ─── */
+  .experience-glass--welcome {
+    @apply gap-5 py-6;
+  }
+
+  .experience-header--welcome {
+    @apply space-y-4 pb-1;
+  }
+
+  .welcome-hero-title {
+    @apply text-[2rem] leading-[1.15] sm:text-[2.35rem];
+    color: var(--henna-cream);
+    text-wrap: balance;
+  }
+
+  [dir="rtl"] .welcome-hero-title {
+    font-family: var(--font-arabic-display), "Aref Ruqaa", "Amiri", serif;
+    @apply text-[2.1rem] font-bold sm:text-[2.5rem];
+  }
+
+  [dir="ltr"] .welcome-hero-title {
+    font-family: var(--font-english), "Cormorant Garamond", Georgia, serif;
+    @apply font-semibold tracking-wide sm:text-[2.5rem];
+  }
+
+  .welcome-hero-subtitle {
+    @apply mx-auto max-w-[22rem] text-[0.95rem] leading-relaxed sm:text-base;
+  }
+
+  .welcome-hero {
+    @apply flex flex-col gap-4;
+  }
+
+  .welcome-couple-frame {
+    @apply relative mx-auto w-full max-w-[17rem];
+    border: 1px solid color-mix(in srgb, var(--henna-gold) 40%, transparent);
+    background: color-mix(in srgb, var(--henna-bg) 45%, transparent);
+    box-shadow: var(--henna-shadow);
+    clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 14px);
+  }
+
+  .welcome-couple-frame__inner {
+    @apply relative aspect-[4/5] overflow-hidden;
+  }
+
+  .welcome-couple-frame__photo {
+    @apply h-full w-full object-cover object-center;
+  }
+
+  .welcome-couple-frame__placeholder {
+    @apply flex h-full flex-col items-center justify-center gap-3 px-4 text-center;
+    background: color-mix(in srgb, var(--henna-cream) 6%, transparent);
+    color: var(--henna-muted);
+  }
+
+  .welcome-couple-frame__placeholder-icon {
+    @apply text-2xl;
+    color: var(--henna-gold);
+    opacity: 0.7;
+  }
+
+  .welcome-couple-frame__placeholder p {
+    @apply text-xs leading-relaxed;
   }
 }

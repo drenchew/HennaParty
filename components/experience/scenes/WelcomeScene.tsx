@@ -2,18 +2,19 @@
 
 import { useState } from "react";
 import { GuestTokenInit } from "@/components/layout/StepGuard";
-import { OrnamentalCard } from "@/components/ornamental";
+import { OrnamentDivider } from "@/components/ornamental";
 import { ExperienceNav } from "@/components/experience/ExperienceNav";
 import { SceneShell } from "@/components/experience/SceneShell";
 import { useExperienceContext } from "@/components/experience/ExperienceProvider";
 import { useFlowContext } from "@/components/providers/FlowProvider";
 import { useLocale } from "@/components/providers/LocaleProvider";
+import { CouplePhotoFrame } from "@/components/welcome";
 import { isApiError } from "@/lib/utils/api";
 import { completeStep } from "@/services/mock/flow.service";
 import { initGuest } from "@/services/guest.service";
 
 export function WelcomeScene() {
-  const { guestToken, refresh } = useFlowContext();
+  const { refresh } = useFlowContext();
   const { nextStep } = useExperienceContext();
   const { t } = useLocale();
   const [starting, setStarting] = useState(false);
@@ -41,7 +42,8 @@ export function WelcomeScene() {
     <GuestTokenInit>
       <SceneShell
         step="welcome"
-        title={t("welcome.title")}
+        welcomeHero
+        title={t("welcome.heroTitle")}
         subtitle={t("welcome.subtitle")}
         framed
         footer={
@@ -53,15 +55,11 @@ export function WelcomeScene() {
           />
         }
       >
-        <OrnamentalCard corners>
-          <p className="experience-copy">{t("welcome.sessionReady")}</p>
-          {guestToken && (
-            <p className="experience-meta">
-              {t("welcome.session")}: <code>{guestToken.slice(0, 8)}…</code>
-            </p>
-          )}
-          {startError && <p className="experience-error">{startError}</p>}
-        </OrnamentalCard>
+        <div className="welcome-hero">
+          <CouplePhotoFrame />
+          <OrnamentDivider />
+        </div>
+        {startError && <p className="experience-error">{startError}</p>}
       </SceneShell>
     </GuestTokenInit>
   );

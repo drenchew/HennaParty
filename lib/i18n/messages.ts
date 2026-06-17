@@ -26,9 +26,12 @@ export const messages: Record<Locale, MessageTree> = {
       complete: "شكراً لك",
     },
     welcome: {
-      title: "أهلاً بكم في ليلة الحناء",
+      heroTitle: "ليلة حناء عائدة",
+      title: "ليلة حناء عائدة",
       subtitle:
         "شكراً لكونكم جزءاً من هذه الاحتفالية. لكل ضيف تجربة فريدة — لنبدأ رحلتكم.",
+      photoAlt: "صورة العروسين — ليلة حناء عائدة",
+      photoPlaceholder: "ضعوا صورتكم في public/images/couple.png",
       sessionReady:
         "جلسة ضيف مجهولة جاهزة. لا حاجة لتسجيل الدخول — أنشأنا لكم معرّفاً خاصاً.",
       session: "الجلسة",
@@ -150,9 +153,12 @@ export const messages: Record<Locale, MessageTree> = {
       complete: "Thank You",
     },
     welcome: {
-      title: "Welcome to our Henna Night",
+      heroTitle: "Ayda Henna Night",
+      title: "Ayda Henna Night",
       subtitle:
         "Thank you for being part of this celebration. Each guest receives a unique experience — let's begin yours.",
+      photoAlt: "Ayda — Henna Night",
+      photoPlaceholder: "Add your photo at public/images/couple.png",
       sessionReady:
         "Your anonymous session is ready. No login required — we've created a private guest ID just for you.",
       session: "Session",

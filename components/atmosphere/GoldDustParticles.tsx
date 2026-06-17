@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { GOLD_DUST_CONFIG } from "@/lib/constants/atmosphere";
 
 const COLORS = ["#E8C872", "#D8B56A", "#C8A96A", "#F0E0B0", "#B89858"] as const;
 
@@ -31,23 +32,28 @@ function isLowEndDevice(): boolean {
 
 function targetParticleCount(reducedMotion: boolean, lowEnd: boolean): number {
   if (reducedMotion) return 0;
-  if (lowEnd) return 12;
+  if (lowEnd) return GOLD_DUST_CONFIG.countLowEnd;
   const mobile = typeof window !== "undefined" && window.innerWidth < 768;
-  return mobile
-    ? Math.round(randomBetween(15, 25))
-    : Math.round(randomBetween(30, 50));
+  const range = mobile ? GOLD_DUST_CONFIG.countMobile : GOLD_DUST_CONFIG.countDesktop;
+  return Math.round(randomBetween(range.min, range.max));
 }
 
 function createParticle(width: number, height: number): Particle {
+  const speed = GOLD_DUST_CONFIG.speedMultiplier;
   return {
     x: Math.random() * width,
     y: Math.random() * height,
-    size: randomBetween(1.2, 3.5),
-    opacity: randomBetween(0.12, 0.28),
-    opacitySpeed: randomBetween(0.0004, 0.0012),
-    opacityPhase: Math.random() * Math.PI * 2,
-    driftX: randomBetween(-0.08, 0.08),
-    riseY: randomBetween(-0.12, -0.04),
+    size: randomBetween(GOLD_DUST_CONFIG.size.min, GOLD_DUST_CONFIG.size.max),
+    opacity: randomBetween(GOLD_DUST_CONFIG.opacity.min, GOLD_DUST_CONFIG.opacity.max),
+    opacitySpeed:
+      randomBetween(
+        GOLD_DUST_CONFIG.opacitySpeed.min,
+        GOLD_DUST_CONFIG.opacitySpeed.max
+      ) * speed,    opacityPhase: Math.random() * Math.PI * 2,
+    driftX:
+      randomBetween(GOLD_DUST_CONFIG.driftX.min, GOLD_DUST_CONFIG.driftX.max) * speed,
+    riseY:
+      randomBetween(GOLD_DUST_CONFIG.riseY.min, GOLD_DUST_CONFIG.riseY.max) * speed,
     color: COLORS[Math.floor(Math.random() * COLORS.length)] ?? COLORS[0],
   };
 }

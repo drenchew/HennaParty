@@ -1,0 +1,1 @@
+export { CouplePhotoFrame } from "./CouplePhotoFrame";

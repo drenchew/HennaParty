@@ -16,6 +16,8 @@ interface SceneShellProps {
   children: ReactNode;
   footer?: ReactNode;
   framed?: boolean;
+  /** Welcome scene uses a custom hero layout without the default eyebrow. */
+  welcomeHero?: boolean;
 }
 
 /** Full-viewport scene layout — glass panel over ornamental background. */
@@ -26,6 +28,7 @@ export function SceneShell({
   children,
   footer,
   framed = false,
+  welcomeHero = false,
 }: SceneShellProps) {
   const { isReady } = useFlowContext();
   const { t } = useLocale();
@@ -40,14 +43,34 @@ export function SceneShell({
       data-step={step}
       aria-label={t(`steps.${stepKey}`)}
     >
-      <div className={`experience-glass ${framed ? "experience-glass--framed" : ""}`}>
-        <LanguageToggle />
-        <header className="experience-header">
-          <p className="experience-eyebrow">{t("common.hennaNight")}</p>
-          {title ? <h1 className="experience-title">{title}</h1> : null}
-          {subtitle ? <p className="experience-subtitle">{subtitle}</p> : null}
+      <div
+        className={`experience-glass ${framed ? "experience-glass--framed" : ""} ${welcomeHero ? "experience-glass--welcome" : ""}`}
+      >
+        <div className="experience-toolbar">
+          <LanguageToggle />
+        </div>
+        <header
+          className={`experience-header ${welcomeHero ? "experience-header--welcome" : ""}`}
+        >
+          {!welcomeHero ? (
+            <p className="experience-eyebrow">{t("common.hennaNight")}</p>
+          ) : null}
+          {title ? (
+            <h1
+              className={`experience-title ${welcomeHero ? "welcome-hero-title" : ""}`}
+            >
+              {title}
+            </h1>
+          ) : null}
+          {subtitle ? (
+            <p
+              className={`experience-subtitle ${welcomeHero ? "welcome-hero-subtitle" : ""}`}
+            >
+              {subtitle}
+            </p>
+          ) : null}
           {showProgress ? <StepIndicator currentStep={step} /> : null}
-          <OrnamentDivider />
+          {!welcomeHero ? <OrnamentDivider /> : null}
         </header>
 
         <div className="experience-body" data-ready={isReady}>
