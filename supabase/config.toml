@@ -1,0 +1,8 @@
+# Supabase local/dev config — project ref matches NEXT_PUBLIC_SUPABASE_URL
+project_id = "hgxihcjjtwzhamrpzwhb"
+
+[api]
+enabled = true
+
+[db]
+major_version = 15

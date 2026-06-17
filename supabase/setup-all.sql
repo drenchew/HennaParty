@@ -401,5 +401,154 @@ ON CONFLICT (id) DO UPDATE SET
   file_size_limit    = EXCLUDED.file_size_limit,
   allowed_mime_types = EXCLUDED.allowed_mime_types;
 
--- Storage RLS policies live in 20250615000003_storage_rls.sql (apply via Supabase SQL Editor).
+-- =============================================================================
+-- Storage RLS — block public/anon; service role manages objects via API
+-- =============================================================================
+ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+
+-- Deny anon on all buckets
+CREATE POLICY "storage_objects_deny_anon_select"
+  ON storage.objects FOR SELECT TO anon
+  USING (false);
+
+CREATE POLICY "storage_objects_deny_anon_insert"
+  ON storage.objects FOR INSERT TO anon
+  WITH CHECK (false);
+
+CREATE POLICY "storage_objects_deny_anon_update"
+  ON storage.objects FOR UPDATE TO anon
+  USING (false) WITH CHECK (false);
+
+CREATE POLICY "storage_objects_deny_anon_delete"
+  ON storage.objects FOR DELETE TO anon
+  USING (false);
+
+-- Deny authenticated (no Supabase Auth login in this app)
+CREATE POLICY "storage_objects_deny_authenticated_select"
+  ON storage.objects FOR SELECT TO authenticated
+  USING (false);
+
+CREATE POLICY "storage_objects_deny_authenticated_insert"
+  ON storage.objects FOR INSERT TO authenticated
+  WITH CHECK (false);
+
+CREATE POLICY "storage_objects_deny_authenticated_update"
+  ON storage.objects FOR UPDATE TO authenticated
+  USING (false) WITH CHECK (false);
+
+CREATE POLICY "storage_objects_deny_authenticated_delete"
+  ON storage.objects FOR DELETE TO authenticated
+  USING (false);
+
+-- Service role: full access to photos + videos buckets
+CREATE POLICY "storage_service_role_photos_all"
+  ON storage.objects FOR ALL TO service_role
+  USING (bucket_id = 'photos')
+  WITH CHECK (bucket_id = 'photos');
+
+CREATE POLICY "storage_service_role_videos_all"
+  ON storage.objects FOR ALL TO service_role
+  USING (bucket_id = 'videos')
+  WITH CHECK (bucket_id = 'videos');
+
+-- Optional: path convention enforcement helper (call from upload API before storage insert)
 -- Expected paths: {guest_id}/{file_id}.ext
+
+
+-- =============================================================================
+-- Seed duas pool (expand as needed before the event)
+-- =============================================================================
+INSERT INTO public.duas (arabic, translation) VALUES
+  (
+    'رَبَّنَا هَبْ لَنَا مِنْ أَزْوَاجِنَا وَذُرِّيَّاتِنَا قُرَّةَ أَعْيُنٍ',
+    'Our Lord, grant us from among our spouses and offspring comfort to our eyes.'
+  ),
+  (
+    'رَبِّ أَوْزِعْنِي أَنْ أَشْكُرَ نِعْمَتَكَ الَّتِي أَنْعَمْتَ عَلَيَّ',
+    'My Lord, enable me to be grateful for Your favor which You have bestowed upon me.'
+  ),
+  (
+    'رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً',
+    'Our Lord, give us good in this world and good in the Hereafter.'
+  ),
+  (
+    'رَبَّنَا لَا تُزِغْ قُلُوبَنَا بَعْدَ إِذْ هَدَيْتَنَا',
+    'Our Lord, let not our hearts deviate after You have guided us.'
+  ),
+  (
+    'رَبَّنَا اغْفِرْ لَنَا ذُنُوبَنَا وَكَفِّرْ عَنَّا سَيِّئَاتِنَا',
+    'Our Lord, forgive us our sins and remove from us our misdeeds.'
+  ),
+  (
+    'رَبِّ هَبْ لِي مِن لَّدُنكَ ذُرِّيَّةً طَيِّبَةً',
+    'My Lord, grant me from Yourself righteous offspring.'
+  ),
+  (
+    'رَبَّنَا تَقَبَّلْ مِنَّا إِنَّكَ أَنتَ السَّمِيعُ الْعَلِيمُ',
+    'Our Lord, accept this from us. Indeed You are the Hearing, the Knowing.'
+  ),
+  (
+    'رَبِّ اجْعَلْنِي مُقِيمَ الصَّلَاةِ وَمِن ذُرِّيَّتِي',
+    'My Lord, make me an establisher of prayer, and from my descendants.'
+  ),
+  (
+    'اللَّهُمَّ بَارِكْ لَهُمَا وَبَارِكْ عَلَيْهِمَا',
+    'O Allah, bless them and bestow blessings upon them.'
+  ),
+  (
+    'اللَّهُمَّ أَلِّفْ بَيْنَ قُلُوبِهِمَا وَاجْعَلْ فِي قُلُوبِهِمَا الْمَحَبَّةَ',
+    'O Allah, unite their hearts and place love between them.'
+  );
+
+
+-- Track explicit guest acceptance separately from assignment time
+ALTER TABLE public.duas
+  ADD COLUMN IF NOT EXISTS accepted_at TIMESTAMPTZ;
+
+COMMENT ON COLUMN public.duas.accepted_at IS 'Set when guest clicks "I accept this dua".';
+
+-- Idempotent accept — safe under double-clicks and retries
+CREATE OR REPLACE FUNCTION public.accept_dua(p_guest_token UUID)
+RETURNS public.duas
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_guest_id UUID;
+  v_dua      public.duas;
+BEGIN
+  SELECT id INTO v_guest_id
+  FROM public.guests
+  WHERE guest_token = p_guest_token;
+
+  IF v_guest_id IS NULL THEN
+    RAISE EXCEPTION 'GUEST_NOT_FOUND'
+      USING ERRCODE = 'no_data_found';
+  END IF;
+
+  SELECT d.* INTO v_dua
+  FROM public.duas d
+  WHERE d.assigned_guest_id = v_guest_id;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'DUA_NOT_ASSIGNED'
+      USING ERRCODE = 'no_data_found';
+  END IF;
+
+  IF v_dua.accepted_at IS NOT NULL THEN
+    RETURN v_dua;
+  END IF;
+
+  UPDATE public.duas d
+  SET accepted_at = now()
+  WHERE d.id = v_dua.id
+    AND d.accepted_at IS NULL
+  RETURNING d.* INTO v_dua;
+
+  RETURN v_dua;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.accept_dua(UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.accept_dua(UUID) TO service_role;
