@@ -8,7 +8,7 @@ import { SceneShell } from "@/components/experience/SceneShell";
 import { useExperienceContext } from "@/components/experience/ExperienceProvider";
 import { useFlowContext } from "@/components/providers/FlowProvider";
 import { useLocale } from "@/components/providers/LocaleProvider";
-import { CouplePhotoFrame, WelcomeHeroTitle } from "@/components/welcome";
+import { CouplePhotoFrame, WelcomeHeroTitle, WelcomePartyDate } from "@/components/welcome";
 import { isApiError } from "@/lib/utils/api";
 import { completeStep } from "@/services/mock/flow.service";
 import { initGuest } from "@/services/guest.service";
@@ -44,6 +44,7 @@ export function WelcomeScene() {
         step="welcome"
         welcomeHero
         title={<WelcomeHeroTitle />}
+        heroDate={<WelcomePartyDate />}
         subtitle={t("welcome.subtitle")}
         framed
         footer={

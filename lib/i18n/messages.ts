@@ -31,6 +31,9 @@ export const messages: Record<Locale, MessageTree> = {
       heroTitlePrefix: "ليلة حناء",
       heroTitleSuffix: "",
       title: "ليلة حناء عائدة",
+      partyDateDay: "٢٤",
+      partyDateMonth: "يونيو",
+      partyDateFull: "٢٤ يونيو",
       subtitle:
         "شكراً لكونكم جزءاً من هذه الاحتفالية. لكل ضيف تجربة فريدة — لنبدأ رحلتكم.",
       photoAlt: "صورة العروسين — ليلة حناء عائدة",
@@ -161,6 +164,9 @@ export const messages: Record<Locale, MessageTree> = {
       heroTitlePrefix: "",
       heroTitleSuffix: "Henna Night",
       title: "Ayda Henna Night",
+      partyDateDay: "24",
+      partyDateMonth: "June",
+      partyDateFull: "June 24",
       subtitle:
         "Thank you for being part of this celebration. Each guest receives a unique experience — let's begin yours.",
       photoAlt: "Ayda — Henna Night",

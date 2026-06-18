@@ -18,6 +18,8 @@ interface SceneShellProps {
   framed?: boolean;
   /** Welcome scene uses a custom hero layout without the default eyebrow. */
   welcomeHero?: boolean;
+  /** Optional ornament shown between title and subtitle on the welcome hero. */
+  heroDate?: ReactNode;
 }
 
 /** Full-viewport scene layout — glass panel over ornamental background. */
@@ -29,6 +31,7 @@ export function SceneShell({
   footer,
   framed = false,
   welcomeHero = false,
+  heroDate,
 }: SceneShellProps) {
   const { isReady } = useFlowContext();
   const { t } = useLocale();
@@ -62,6 +65,7 @@ export function SceneShell({
               {title}
             </h1>
           ) : null}
+          {welcomeHero && heroDate ? heroDate : null}
           {subtitle ? (
             <p
               className={`experience-subtitle ${welcomeHero ? "welcome-hero-subtitle" : ""}`}

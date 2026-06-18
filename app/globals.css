@@ -1091,6 +1091,71 @@
     }
   }
 
+  .welcome-party-date {
+    @apply mx-auto flex max-w-[16rem] items-center justify-center gap-2;
+  }
+
+  .welcome-party-date__line {
+    @apply h-px flex-1;
+    background: linear-gradient(
+      to right,
+      transparent,
+      color-mix(in srgb, var(--henna-gold) 55%, transparent)
+    );
+  }
+
+  .welcome-party-date__line:last-of-type {
+    background: linear-gradient(
+      to left,
+      transparent,
+      color-mix(in srgb, var(--henna-gold) 55%, transparent)
+    );
+  }
+
+  .welcome-party-date__gem {
+    @apply shrink-0 text-[9px] leading-none;
+    color: color-mix(in srgb, var(--henna-gold) 75%, transparent);
+  }
+
+  .welcome-party-date__card {
+    @apply flex min-w-[4.5rem] flex-col items-center gap-0.5 px-3 py-1.5;
+    border: 1px solid color-mix(in srgb, var(--henna-gold) 35%, transparent);
+    background: color-mix(in srgb, var(--henna-bg) 50%, transparent);
+    box-shadow: inset 0 0 20px rgba(212, 168, 83, 0.06), 0 4px 16px rgba(0, 0, 0, 0.2);
+    clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px);
+  }
+
+  .welcome-party-date__day {
+    @apply text-[1.65rem] font-semibold leading-none;
+    color: var(--henna-gold);
+    text-shadow: 0 0 16px rgba(212, 168, 83, 0.35);
+  }
+
+  [dir="rtl"] .welcome-party-date__day {
+    font-family: var(--font-arabic-display), "Mushym", serif;
+    @apply text-[1.75rem] font-bold;
+  }
+
+  [dir="ltr"] .welcome-party-date__day {
+    font-family: var(--font-english), "Bilderberg", Georgia, serif;
+  }
+
+  .welcome-party-date__month {
+    @apply text-[10px] leading-none;
+    color: var(--henna-muted);
+    letter-spacing: 0.28em;
+  }
+
+  [dir="ltr"] .welcome-party-date__month {
+    @apply uppercase;
+    font-family: var(--font-english), "Bilderberg", Georgia, serif;
+  }
+
+  [dir="rtl"] .welcome-party-date__month {
+    font-family: var(--font-arabic-body), "Mushym", serif;
+    @apply text-xs tracking-normal;
+  }
+
   .welcome-hero-subtitle {
     @apply mx-auto max-w-[22rem] text-[0.95rem] leading-relaxed sm:text-base;
   }
