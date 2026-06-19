@@ -3,7 +3,8 @@
  *
  * Requires DATABASE_URL in .env.local (transaction pooler port 6543 on Windows).
  *
- * Storage RLS (20250615000003_storage_rls.sql) must still be applied in SQL Editor.
+ * Storage RLS (20250615000003_storage_rls.sql) is OPTIONAL — apply in SQL Editor
+ * only if you want extra lock-down. The app uses service role and works without it.
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -163,7 +164,7 @@ try {
   }
 
   console.log(
-    "\nReminder: run supabase/migrations/20250615000003_storage_rls.sql in the Supabase SQL Editor if storage RLS is not set up yet.",
+    "\nOptional: run supabase/migrations/20250615000003_storage_rls.sql in the Supabase SQL Editor for extra storage lock-down (skip if it errors — app works without it).",
   );
 } catch (error) {
   console.error("\n❌ Migration failed:", error.message);

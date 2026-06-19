@@ -1,9 +1,5 @@
-import { AdminMessagesPanel } from "@/components/admin/AdminMessagesPanel";
+import { redirect } from "next/navigation";
 
-export default function AdminMessagesPage() {
-  return (
-    <div className="flow-app">
-      <AdminMessagesPanel />
-    </div>
-  );
+export default function AdminMessagesRedirect() {
+  redirect("/admin?tab=messages");
 }
