@@ -13,6 +13,10 @@ import { uploadPhotoForGuest } from "@/lib/photo/server";
  * multipart/form-data field: photo
  * Max 3 photos per guest — enforced before storage upload + DB trigger
  */
+/**
+ * Legacy multipart upload — kept for local fallback.
+ * Production clients use /api/photo/upload/prepare + direct Supabase upload + /complete.
+ */
 export async function POST(request: NextRequest) {
   try {
     const guestToken = requireGuestToken(request);
@@ -35,7 +39,7 @@ export async function POST(request: NextRequest) {
       if (
         code &&
         message &&
-        ["EMPTY_FILE", "FILE_TOO_LARGE", "INVALID_MIME", "PHOTO_LIMIT_REACHED"].includes(
+        ["EMPTY_FILE", "FILE_TOO_LARGE", "INVALID_MIME", "PHOTO_LIMIT_REACHED", "HIJAB_PREFERENCE_REQUIRED"].includes(
           code,
         )
       ) {

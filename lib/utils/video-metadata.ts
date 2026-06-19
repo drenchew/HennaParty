@@ -1,4 +1,5 @@
 import { MAX_VIDEO_DURATION_SECONDS } from "@/lib/constants/steps";
+import { normalizeVideoMime } from "@/lib/video/validation";
 
 /** Measure duration of a local video file via browser metadata. */
 export function getVideoFileDuration(file: File): Promise<number> {
@@ -39,10 +40,13 @@ export function formatUnlockDate(iso: string): string {
 }
 
 export function pickRecorderMimeType(): string {
+  if (typeof MediaRecorder === "undefined") return "";
+
   const candidates = [
     "video/webm;codecs=vp9,opus",
     "video/webm;codecs=vp8,opus",
     "video/webm",
+    "video/mp4;codecs=avc1,mp4a.40.2",
     "video/mp4",
   ];
 
@@ -51,6 +55,19 @@ export function pickRecorderMimeType(): string {
   }
 
   return "";
+}
+
+export function mimeToExtension(mimeType: string): "webm" | "mp4" {
+  const normalized = mimeType.split(";")[0]?.trim().toLowerCase() ?? "";
+  if (normalized.includes("mp4")) return "mp4";
+  return "webm";
+}
+
+export function fileFromRecordedBlob(blob: Blob, mimeType: string): File {
+  const ext = mimeToExtension(mimeType);
+  const normalized =
+    normalizeVideoMime(mimeType, `recording.${ext}`) ?? (ext === "mp4" ? "video/mp4" : "video/webm");
+  return new File([blob], `time-capsule.${ext}`, { type: normalized });
 }
 
 export function validateDuration(duration: number): string | null {

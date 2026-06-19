@@ -336,7 +336,7 @@
   }
 
   .flow-video-preview {
-    @apply aspect-video w-full rounded-xl bg-black object-cover;
+    @apply aspect-video min-h-[12rem] w-full rounded-xl bg-black object-cover;
   }
 
   .flow-video-timer {
@@ -1162,6 +1162,62 @@
 
   .welcome-hero {
     @apply flex flex-col gap-4;
+  }
+
+  .welcome-hijab-choice,
+  .media-hijab-choice {
+    @apply mx-auto w-full max-w-[20rem] space-y-3 text-center;
+  }
+
+  .welcome-hijab-choice__prompt,
+  .media-hijab-choice__prompt {
+    @apply text-sm leading-relaxed;
+    color: var(--henna-cream);
+  }
+
+  .welcome-hijab-choice__options,
+  .media-hijab-choice__options {
+    @apply grid grid-cols-1 gap-2 sm:grid-cols-2;
+  }
+
+  .welcome-hijab-choice__option,
+  .media-hijab-choice__option {
+    @apply flex flex-col items-center gap-1.5 border px-3 py-3 text-xs font-semibold transition;
+    border-color: color-mix(in srgb, var(--henna-gold) 30%, transparent);
+    background: color-mix(in srgb, var(--henna-bg) 40%, transparent);
+    color: var(--henna-muted);
+    clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px);
+  }
+
+  .welcome-hijab-choice__option:hover:not(:disabled),
+  .media-hijab-choice__option:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--henna-gold) 55%, transparent);
+    color: var(--henna-cream);
+  }
+
+  .welcome-hijab-choice__option--selected,
+  .media-hijab-choice__option--selected {
+    border-color: color-mix(in srgb, var(--henna-gold) 70%, transparent);
+    background: color-mix(in srgb, var(--henna-gold) 12%, transparent);
+    color: var(--henna-gold);
+    box-shadow: 0 0 16px rgba(212, 168, 83, 0.2);
+  }
+
+  .welcome-hijab-choice__option:disabled,
+  .media-hijab-choice__option:disabled {
+    @apply cursor-not-allowed opacity-60;
+  }
+
+  .welcome-hijab-choice__option-icon,
+  .media-hijab-choice__option-icon {
+    @apply text-[10px] leading-none;
+    opacity: 0.75;
+  }
+
+  .welcome-hijab-choice__note,
+  .media-hijab-choice__note {
+    @apply text-[11px] leading-relaxed;
+    color: var(--henna-muted);
   }
 
   .welcome-couple-frame {

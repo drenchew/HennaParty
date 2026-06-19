@@ -12,6 +12,8 @@ export interface Guest {
   id: string;
   guest_token: string;
   created_at: string;
+  /** null until guest chooses on welcome; routes photo/video to hijabi or standard buckets */
+  hijabi: boolean | null;
 }
 
 export interface Dua {
@@ -29,6 +31,7 @@ export interface Photo {
   guest_id: string;
   url: string;
   created_at: string;
+  is_hijabi: boolean;
 }
 
 export interface Message {
@@ -44,6 +47,7 @@ export interface Video {
   video_url: string;
   unlock_date: string;
   created_at: string;
+  is_hijabi: boolean;
 }
 
 export interface Vote {

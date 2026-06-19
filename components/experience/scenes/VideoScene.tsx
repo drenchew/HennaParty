@@ -4,10 +4,12 @@ import { useCallback, useEffect, useState } from "react";
 import { ExperienceNav } from "@/components/experience/ExperienceNav";
 import { useExperienceContext } from "@/components/experience/ExperienceProvider";
 import { SceneShell } from "@/components/experience/SceneShell";
+import { HijabPreferenceGate } from "@/components/media";
 import { OrnamentalCard } from "@/components/ornamental";
 import { VideoCapsuleUpload } from "@/components/video/VideoCapsuleUpload";
 import { useFlowContext } from "@/components/providers/FlowProvider";
 import { useLocale } from "@/components/providers/LocaleProvider";
+import { useGuestHijabi } from "@/hooks/useGuestHijabi";
 import { isApiError } from "@/lib/utils/api";
 import { formatUnlockDate } from "@/lib/utils/video-metadata";
 import { completeStep } from "@/services/mock/flow.service";
@@ -18,6 +20,7 @@ export function VideoScene() {
   const { refresh } = useFlowContext();
   const { nextStep, prevStep, setTransitionLocked } = useExperienceContext();
   const { t } = useLocale();
+  const { hijabi: guestHijabi } = useGuestHijabi();
   const [uploaded, setUploaded] = useState<SafeVideo | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [pendingDuration, setPendingDuration] = useState(0);
@@ -93,13 +96,18 @@ export function VideoScene() {
     return true;
   }
 
+  const videoSubtitle =
+    guestHijabi === true ? t("video.subtitleHijabi") : t("video.subtitleStandard");
+
+  const canUpload = guestHijabi !== null;
+
   return (
     <SceneShell
       step="video"
       title={t("video.title")}
-      subtitle={t("video.subtitle")}
+      subtitle={canUpload ? videoSubtitle : t("media.hijabIntro")}
       footer={
-        !loading ? (
+        !loading && canUpload ? (
           <ExperienceNav
             onBack={prevStep}
             continueLabel={
@@ -112,32 +120,36 @@ export function VideoScene() {
             onContinue={handleContinue}
             continueDisabled={uploading || (!uploaded && !pendingFile)}
           />
+        ) : !loading ? (
+          <ExperienceNav onBack={prevStep} showContinue={false} />
         ) : null
       }
     >
       {loading && <p className="experience-loading">{t("video.loading")}</p>}
 
-      {!loading && uploaded && (
-        <OrnamentalCard>
-          <div className="experience-stack">
-            <p className="experience-success">{t("video.saved")}</p>
-            <p className="experience-meta">
-              {t("video.unlocks")}{" "}
-              <strong>{formatUnlockDate(uploaded.unlock_date)}</strong>
-            </p>
-            <p className="experience-meta">{t("video.lockedNote")}</p>
-          </div>
-        </OrnamentalCard>
-      )}
-
-      {!loading && !uploaded && (
-        <OrnamentalCard>
-          <VideoCapsuleUpload
-            onVideoReady={handleVideoReady}
-            onClear={handleClear}
-            disabled={uploading}
-          />
-        </OrnamentalCard>
+      {!loading && (
+        <HijabPreferenceGate>
+          {uploaded ? (
+            <OrnamentalCard>
+              <div className="experience-stack">
+                <p className="experience-success">{t("video.saved")}</p>
+                <p className="experience-meta">
+                  {t("video.unlocks")}{" "}
+                  <strong>{formatUnlockDate(uploaded.unlock_date)}</strong>
+                </p>
+                <p className="experience-meta">{t("video.lockedNote")}</p>
+              </div>
+            </OrnamentalCard>
+          ) : (
+            <OrnamentalCard>
+              <VideoCapsuleUpload
+                onVideoReady={handleVideoReady}
+                onClear={handleClear}
+                disabled={uploading}
+              />
+            </OrnamentalCard>
+          )}
+        </HijabPreferenceGate>
       )}
 
       {error && <p className="experience-error">{error}</p>}

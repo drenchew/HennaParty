@@ -21,6 +21,31 @@ export function isAllowedVideoMime(type: string): type is AllowedVideoMime {
   return (ALLOWED_VIDEO_MIME_TYPES as readonly string[]).includes(type);
 }
 
+/** Strip codec suffixes and map browser-specific types to a storage MIME. */
+export function normalizeVideoMime(
+  type: string,
+  fileName?: string,
+): AllowedVideoMime | null {
+  const base = type.split(";")[0]?.trim().toLowerCase() ?? "";
+
+  if (isAllowedVideoMime(base)) return base;
+  if (base.startsWith("video/webm")) return "video/webm";
+  if (base.startsWith("video/mp4")) return "video/mp4";
+
+  if (fileName) {
+    const ext = fileName.split(".").pop()?.toLowerCase();
+    if (ext === "mp4" || ext === "m4v") return "video/mp4";
+    if (ext === "mov") return "video/quicktime";
+    if (ext === "webm") return "video/webm";
+  }
+
+  return null;
+}
+
+export function resolveVideoMime(file: File): AllowedVideoMime | null {
+  return normalizeVideoMime(file.type, file.name);
+}
+
 export function extensionForMime(mime: string): string {
   if (isAllowedVideoMime(mime)) return MIME_EXTENSION[mime];
   return "webm";
@@ -30,13 +55,28 @@ export function validateVideoUpload(input: {
   file: File;
   durationSeconds: number;
 }): { ok: true } | { ok: false; code: string; message: string } {
-  const { file, durationSeconds } = input;
+  return validateVideoMeta({
+    mimeType: input.file.type,
+    size: input.file.size,
+    durationSeconds: input.durationSeconds,
+    fileName: input.file.name,
+  });
+}
 
-  if (!file.size) {
+export function validateVideoMeta(input: {
+  mimeType: string;
+  size: number;
+  durationSeconds: number;
+  fileName?: string;
+}): { ok: true } | { ok: false; code: string; message: string } {
+  const { size, durationSeconds, fileName } = input;
+  const mime = resolveVideoMime({ type: input.mimeType, name: fileName ?? "" } as File);
+
+  if (!size) {
     return { ok: false, code: "EMPTY_FILE", message: "Video file is empty" };
   }
 
-  if (file.size > MAX_VIDEO_BYTES) {
+  if (size > MAX_VIDEO_BYTES) {
     return {
       ok: false,
       code: "FILE_TOO_LARGE",
@@ -44,7 +84,7 @@ export function validateVideoUpload(input: {
     };
   }
 
-  if (!isAllowedVideoMime(file.type)) {
+  if (!mime) {
     return {
       ok: false,
       code: "INVALID_MIME",

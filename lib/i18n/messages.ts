@@ -44,6 +44,14 @@ export const messages: Record<Locale, MessageTree> = {
       begin: "ابدأ الرحلة",
       starting: "جاري البدء…",
     },
+    media: {
+      hijabIntro: "اختر أين تُحفظ صوركم وفيديوكم قبل الرفع.",
+      hijabPrompt: "هل ترتدين الحجاب؟",
+      hijabYes: "نعم، أرتدي الحجاب",
+      hijabNo: "لا",
+      hijabNote:
+        "صوركم وفيديوكم يُحفظان في قسم خاص — منفصل عن باقي الضيوف.",
+    },
     dua: {
       title: "دعاؤك الفريد",
       subtitle: "دعاء اختير لكم خصيصاً — نسأل الله أن يبارك للعروسين ولكم.",
@@ -56,6 +64,10 @@ export const messages: Record<Locale, MessageTree> = {
     video: {
       title: "كبسولة فيديو زمنية",
       subtitle: "سجّلوا أو ارفعوا رسالة قصيرة (60 ثانية كحد أقصى). ستُقفل لمدة سنة.",
+      subtitleStandard:
+        "سجّلوا أو ارفعوا رسالة قصيرة (60 ثانية كحد أقصى). ستُحفظ في قسم الضيوف العام.",
+      subtitleHijabi:
+        "سجّلوا أو ارفعوا رسالة قصيرة (60 ثانية كحد أقصى). ستُحفظ في قسم خاص للمحجبات.",
       loading: "جاري التحقق من الكبسولة…",
       saved: "✓ تم حفظ الكبسولة الزمنية بأمان.",
       unlocks: "يُفتح في",
@@ -67,6 +79,8 @@ export const messages: Record<Locale, MessageTree> = {
     photos: {
       title: "شاركوا صوركم",
       subtitle: "ارفعوا حتى {max} صوراً من هذه الليلة.",
+      subtitleStandard: "ارفعوا حتى {max} صوراً — تُحفظ في ألبوم الضيوف العام.",
+      subtitleHijabi: "ارفعوا حتى {max} صوراً — تُحفظ في ألبوم خاص للمحجبات.",
     },
     advice: {
       title: "اتركوا نصيحتكم",
@@ -177,6 +191,14 @@ export const messages: Record<Locale, MessageTree> = {
       begin: "Begin the Journey",
       starting: "Starting…",
     },
+    media: {
+      hijabIntro: "Choose where your photos and video are saved before uploading.",
+      hijabPrompt: "Are you wearing hijab?",
+      hijabYes: "Yes, I wear hijab",
+      hijabNo: "No",
+      hijabNote:
+        "Your photos and video are stored in a private section — separate from other guests.",
+    },
     dua: {
       title: "Your Unique Dua",
       subtitle:
@@ -192,6 +214,10 @@ export const messages: Record<Locale, MessageTree> = {
       title: "Video Time Capsule",
       subtitle:
         "Record or upload a short message (max 60 seconds). It will be locked for one year.",
+      subtitleStandard:
+        "Record or upload a short message (max 60 seconds). Saved to the general guest album.",
+      subtitleHijabi:
+        "Record or upload a short message (max 60 seconds). Saved to the private hijabi section.",
       loading: "Checking time capsule status…",
       saved: "✓ Your time capsule has been saved securely.",
       unlocks: "Unlocks on",
@@ -204,6 +230,8 @@ export const messages: Record<Locale, MessageTree> = {
     photos: {
       title: "Share Your Photos",
       subtitle: "Upload up to {max} photos from tonight.",
+      subtitleStandard: "Upload up to {max} photos — saved to the general guest album.",
+      subtitleHijabi: "Upload up to {max} photos — saved to the private hijabi album.",
     },
     advice: {
       title: "Leave Your Advice",

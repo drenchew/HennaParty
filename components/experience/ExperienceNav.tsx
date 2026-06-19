@@ -5,11 +5,12 @@ import { useLocale } from "@/components/providers/LocaleProvider";
 
 interface ExperienceNavProps {
   backLabel?: string;
-  continueLabel: string;
+  continueLabel?: string;
   onBack?: () => void;
-  onContinue: () => void | Promise<void | boolean>;
+  onContinue?: () => void | Promise<void | boolean>;
   continueDisabled?: boolean;
   showBack?: boolean;
+  showContinue?: boolean;
 }
 
 /** Scene footer navigation with ornamental buttons. */
@@ -20,12 +21,14 @@ export function ExperienceNav({
   onContinue,
   continueDisabled,
   showBack = Boolean(onBack),
+  showContinue = true,
 }: ExperienceNavProps) {
   const { t } = useLocale();
   const resolvedBackLabel = backLabel ?? t("common.back");
+  const resolvedContinueLabel = continueLabel ?? t("common.continue");
 
   async function handleContinue() {
-    if (continueDisabled) return;
+    if (continueDisabled || !onContinue) return;
     await onContinue();
   }
 
@@ -36,9 +39,11 @@ export function ExperienceNav({
           {resolvedBackLabel}
         </OrnamentalButton>
       ) : null}
-      <OrnamentalButton onClick={() => void handleContinue()} disabled={continueDisabled}>
-        {continueLabel}
-      </OrnamentalButton>
+      {showContinue && onContinue ? (
+        <OrnamentalButton onClick={() => void handleContinue()} disabled={continueDisabled}>
+          {resolvedContinueLabel}
+        </OrnamentalButton>
+      ) : null}
     </div>
   );
 }

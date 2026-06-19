@@ -1,4 +1,5 @@
-import { getOrCreateGuestToken } from "@/lib/guest/session";
+import { getOrCreateGuestToken, guestAuthHeaders } from "@/lib/guest/session";
+import { uploadFileViaSignedUrl } from "@/lib/storage/client-upload";
 import type { ApiResponse } from "@/types";
 
 export interface PhotoItem {
@@ -24,6 +25,20 @@ function getToken(): string {
   return getOrCreateGuestToken();
 }
 
+async function guestJsonFetch<T>(
+  path: string,
+  options: RequestInit = {},
+): Promise<ApiResponse<T>> {
+  const response = await fetch(path, {
+    ...options,
+    headers: {
+      ...guestAuthHeaders(getToken()),
+      ...(options.headers ?? {}),
+    },
+  });
+  return (await response.json()) as ApiResponse<T>;
+}
+
 /** GET /api/photo */
 export async function listPhotosFromApi(): Promise<ApiResponse<PhotoListResponse>> {
   const response = await fetch("/api/photo", {
@@ -32,42 +47,41 @@ export async function listPhotosFromApi(): Promise<ApiResponse<PhotoListResponse
   return (await response.json()) as ApiResponse<PhotoListResponse>;
 }
 
-/** POST /api/photo/upload with upload progress (XHR). */
+/** Direct-to-Supabase photo upload (bypasses Vercel body limit). */
 export function uploadPhotoWithProgress(
   file: File,
   onProgress: (percent: number) => void,
 ): Promise<ApiResponse<{ photo: PhotoItem }>> {
-  return new Promise((resolve) => {
-    const xhr = new XMLHttpRequest();
-    const formData = new FormData();
-    formData.append("photo", file);
-
-    xhr.upload.addEventListener("progress", (event) => {
-      if (event.lengthComputable) {
-        onProgress(Math.round((event.loaded / event.total) * 100));
-      }
+  return (async () => {
+    const prepare = await guestJsonFetch<{
+      upload: {
+        bucket: string;
+        path: string;
+        token: string;
+        signedUrl: string;
+        photoId: string;
+      };
+    }>("/api/photo/upload/prepare", {
+      method: "POST",
+      body: JSON.stringify({ mimeType: file.type, size: file.size }),
     });
 
-    xhr.addEventListener("load", () => {
-      try {
-        resolve(JSON.parse(xhr.responseText) as ApiResponse<{ photo: PhotoItem }>);
-      } catch {
-        resolve({ error: "Invalid server response", code: "PARSE_ERROR" });
-      }
-    });
+    if ("error" in prepare) return prepare;
 
-    xhr.addEventListener("error", () => {
-      resolve({ error: "Upload failed", code: "NETWORK_ERROR" });
-    });
+    try {
+      await uploadFileViaSignedUrl(prepare.data.upload.signedUrl, file, onProgress);
+    } catch {
+      return { error: "Upload failed", code: "NETWORK_ERROR" };
+    }
 
-    xhr.addEventListener("abort", () => {
-      resolve({ error: "Upload cancelled", code: "ABORTED" });
+    return guestJsonFetch<{ photo: PhotoItem }>("/api/photo/upload/complete", {
+      method: "POST",
+      body: JSON.stringify({
+        photoId: prepare.data.upload.photoId,
+        mimeType: file.type,
+      }),
     });
-
-    xhr.open("POST", "/api/photo/upload");
-    xhr.setRequestHeader("X-Guest-Token", getToken());
-    xhr.send(formData);
-  });
+  })();
 }
 
 /** DELETE /api/photo/[id] */

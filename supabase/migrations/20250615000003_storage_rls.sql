@@ -44,3 +44,13 @@ CREATE POLICY "storage_service_role_videos_all"
   ON storage.objects FOR ALL TO service_role
   USING (bucket_id = 'videos')
   WITH CHECK (bucket_id = 'videos');
+
+CREATE POLICY "storage_service_role_photos_hijabi_all"
+  ON storage.objects FOR ALL TO service_role
+  USING (bucket_id = 'photos-hijabi')
+  WITH CHECK (bucket_id = 'photos-hijabi');
+
+CREATE POLICY "storage_service_role_videos_hijabi_all"
+  ON storage.objects FOR ALL TO service_role
+  USING (bucket_id = 'videos-hijabi')
+  WITH CHECK (bucket_id = 'videos-hijabi');

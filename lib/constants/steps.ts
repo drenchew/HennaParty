@@ -46,7 +46,11 @@ export const MAX_VIDEO_DURATION_SECONDS = 60;
 
 export const PHOTOS_BUCKET = "photos";
 
+export const PHOTOS_BUCKET_HIJABI = "photos-hijabi";
+
 export const VIDEOS_BUCKET = "videos";
+
+export const VIDEOS_BUCKET_HIJABI = "videos-hijabi";
 
 export {
   QUESTIONNAIRE,

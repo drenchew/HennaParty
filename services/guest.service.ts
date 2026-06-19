@@ -68,6 +68,14 @@ export async function getGuestMe() {
   return apiFetch<GuestMeResponse>("/api/guest/me");
 }
 
+/** POST /api/guest/preference — hijabi vs standard photo/video section. */
+export async function setGuestHijabiPreference(hijabi: boolean) {
+  return apiFetch<{ guest: GuestMeResponse["guest"] }>("/api/guest/preference", {
+    method: "POST",
+    body: JSON.stringify({ hijabi }),
+  });
+}
+
 /** POST /api/dua/assign — atomic unique dua assignment. */
 export async function assignDua() {
   return apiFetch<AssignDuaResponse>("/api/dua/assign", { method: "POST" });

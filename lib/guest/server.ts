@@ -2,18 +2,20 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { QUESTIONNAIRE_QUESTION_COUNT } from "@/lib/constants/questionnaire";
 import type { Guest, GuestProgress } from "@/types";
 
+const GUEST_COLUMNS = "id, guest_token, created_at, hijabi";
+
 export async function findGuestByToken(
   guestToken: string,
 ): Promise<Guest | null> {
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("guests")
-    .select("id, guest_token, created_at")
+    .select(GUEST_COLUMNS)
     .eq("guest_token", guestToken)
     .maybeSingle();
 
   if (error) throw error;
-  return data;
+  return data as Guest | null;
 }
 
 export async function upsertGuest(guestToken: string): Promise<{
@@ -30,11 +32,56 @@ export async function upsertGuest(guestToken: string): Promise<{
   const { data, error } = await supabase
     .from("guests")
     .insert({ guest_token: guestToken })
-    .select("id, guest_token, created_at")
+    .select(GUEST_COLUMNS)
     .single();
 
   if (error) throw error;
-  return { guest: data, created: true };
+  return { guest: data as Guest, created: true };
+}
+
+export async function setGuestHijabiPreference(
+  guestToken: string,
+  hijabi: boolean,
+): Promise<Guest> {
+  await upsertGuest(guestToken);
+  const guest = await findGuestByToken(guestToken);
+  if (!guest) throw new Error("GUEST_NOT_FOUND");
+
+  if (guest.hijabi === hijabi) {
+    return guest;
+  }
+
+  if (guest.hijabi !== null && guest.hijabi !== hijabi) {
+    const supabase = createAdminClient();
+    const [photosResult, videoResult] = await Promise.all([
+      supabase
+        .from("photos")
+        .select("id", { count: "exact", head: true })
+        .eq("guest_id", guest.id),
+      supabase
+        .from("videos")
+        .select("id", { count: "exact", head: true })
+        .eq("guest_id", guest.id),
+    ]);
+
+    const hasMedia = (photosResult.count ?? 0) > 0 || (videoResult.count ?? 0) > 0;
+    if (hasMedia) {
+      throw new Error(
+        "HIJAB_PREFERENCE_LOCKED:Cannot change section after uploading photos or video",
+      );
+    }
+  }
+
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("guests")
+    .update({ hijabi })
+    .eq("id", guest.id)
+    .select(GUEST_COLUMNS)
+    .single();
+
+  if (error) throw error;
+  return data as Guest;
 }
 
 export async function getGuestProgress(guestId: string): Promise<GuestProgress> {

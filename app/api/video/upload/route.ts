@@ -16,6 +16,10 @@ import { uploadVideoForGuest } from "@/lib/video/server";
  *
  * Response never includes storage path or signed URL.
  */
+/**
+ * Legacy multipart upload — kept for local fallback.
+ * Production clients use /api/video/upload/prepare + direct Supabase upload + /complete.
+ */
 export async function POST(request: NextRequest) {
   try {
     const guestToken = requireGuestToken(request);
@@ -47,6 +51,7 @@ export async function POST(request: NextRequest) {
           "INVALID_MIME",
           "INVALID_DURATION",
           "VIDEO_TOO_LONG",
+          "HIJAB_PREFERENCE_REQUIRED",
         ].includes(code)
       ) {
         return jsonError(message, 400, code);

@@ -32,11 +32,18 @@ export function extensionForPhotoMime(mime: string): string {
 export function validatePhotoFile(
   file: File,
 ): { ok: true } | { ok: false; code: string; message: string } {
-  if (!file.size) {
+  return validatePhotoMeta(file.type, file.size);
+}
+
+export function validatePhotoMeta(
+  mimeType: string,
+  size: number,
+): { ok: true } | { ok: false; code: string; message: string } {
+  if (!size) {
     return { ok: false, code: "EMPTY_FILE", message: "Photo file is empty" };
   }
 
-  if (file.size > MAX_PHOTO_BYTES) {
+  if (size > MAX_PHOTO_BYTES) {
     return {
       ok: false,
       code: "FILE_TOO_LARGE",
@@ -44,7 +51,7 @@ export function validatePhotoFile(
     };
   }
 
-  if (!isAllowedPhotoMime(file.type)) {
+  if (!isAllowedPhotoMime(mimeType)) {
     return {
       ok: false,
       code: "INVALID_MIME",

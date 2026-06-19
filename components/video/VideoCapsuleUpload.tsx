@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale } from "@/components/providers/LocaleProvider";
 import { MAX_VIDEO_DURATION_SECONDS } from "@/lib/constants/steps";
 import {
+  fileFromRecordedBlob,
   formatDuration,
   getVideoFileDuration,
   pickRecorderMimeType,
@@ -36,9 +37,10 @@ export function VideoCapsuleUpload({
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const elapsedRef = useRef(0);
 
   const stopStream = useCallback(() => {
-    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current?.getTracks().forEach((track) => track.stop());
     streamRef.current = null;
   }, []);
 
@@ -61,6 +63,27 @@ export function VideoCapsuleUpload({
       revokePreview();
     };
   }, [clearTimer, stopStream, revokePreview]);
+
+  /** Attach camera stream after the <video> element mounts (mode === recording). */
+  useEffect(() => {
+    if (mode !== "recording") return;
+
+    const video = videoRef.current;
+    const stream = streamRef.current;
+    if (!video || !stream) return;
+
+    video.srcObject = stream;
+    video.muted = true;
+    video.playsInline = true;
+
+    void video.play().catch(() => {
+      setError(t("videoUpload.cameraError"));
+    });
+
+    return () => {
+      video.srcObject = null;
+    };
+  }, [mode, t]);
 
   function translateDurationError(message: string | null): string | null {
     if (!message) return null;
@@ -94,18 +117,21 @@ export function VideoCapsuleUpload({
     if (disabled) return;
     setError(null);
     chunksRef.current = [];
+    elapsedRef.current = 0;
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } },
+        video: {
+          facingMode: "user",
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
         audio: true,
       });
 
       streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-      }
+      setMode("recording");
+      setElapsed(0);
 
       const mimeType = pickRecorderMimeType();
       const recorder = mimeType
@@ -122,29 +148,24 @@ export function VideoCapsuleUpload({
         clearTimer();
         stopStream();
 
-        const blob = new Blob(chunksRef.current, {
-          type: recorder.mimeType || "video/webm",
-        });
-        const ext = blob.type.includes("mp4") ? "mp4" : "webm";
-        const file = new File([blob], `time-capsule.${ext}`, { type: blob.type });
+        const recordedMime = recorder.mimeType || mimeType || "video/webm";
+        const blob = new Blob(chunksRef.current, { type: recordedMime });
+        const file = fileFromRecordedBlob(blob, recordedMime);
 
         void getVideoFileDuration(file)
           .then((d) => setReadyFile(file, d))
-          .catch(() => setReadyFile(file, elapsed || MAX_VIDEO_DURATION_SECONDS));
+          .catch(() => setReadyFile(file, elapsedRef.current || 1));
       };
 
       recorder.start(500);
-      setMode("recording");
-      setElapsed(0);
 
       timerRef.current = setInterval(() => {
-        setElapsed((prev) => {
-          const next = prev + 1;
-          if (next >= MAX_VIDEO_DURATION_SECONDS) {
-            recorderRef.current?.stop();
-          }
-          return next;
-        });
+        elapsedRef.current += 1;
+        setElapsed(elapsedRef.current);
+
+        if (elapsedRef.current >= MAX_VIDEO_DURATION_SECONDS) {
+          recorderRef.current?.stop();
+        }
       }, 1000);
     } catch {
       setError(t("videoUpload.cameraError"));
@@ -178,6 +199,7 @@ export function VideoCapsuleUpload({
     setMode("choose");
     setDuration(0);
     setElapsed(0);
+    elapsedRef.current = 0;
     setFileName(null);
     setError(null);
     onClear?.();
@@ -202,7 +224,6 @@ export function VideoCapsuleUpload({
             <input
               type="file"
               accept="video/webm,video/mp4,video/quicktime,video/*"
-              capture="environment"
               disabled={disabled}
               onChange={(e) => void handleFileChange(e)}
             />
@@ -212,11 +233,21 @@ export function VideoCapsuleUpload({
 
       {mode === "recording" && (
         <div className="flow-video-recorder">
-          <video ref={videoRef} className="flow-video-preview" muted playsInline autoPlay />
+          <video
+            ref={videoRef}
+            className="flow-video-preview"
+            muted
+            playsInline
+            autoPlay
+          />
           <div className="flow-video-timer" data-warning={remaining <= 10}>
             {formatDuration(elapsed)} / {formatDuration(MAX_VIDEO_DURATION_SECONDS)}
           </div>
-          <button type="button" className="flow-btn flow-btn--secondary" onClick={handleStopRecording}>
+          <button
+            type="button"
+            className="flow-btn flow-btn--secondary"
+            onClick={handleStopRecording}
+          >
             {t("videoUpload.stop")}
           </button>
         </div>
