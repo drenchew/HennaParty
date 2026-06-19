@@ -48,6 +48,7 @@ export async function uploadVideo(file: File, durationSeconds: number) {
       token: string;
       signedUrl: string;
       videoId: string;
+      contentType: string;
     };
   }>("/api/video/upload/prepare", {
     method: "POST",
@@ -61,17 +62,23 @@ export async function uploadVideo(file: File, durationSeconds: number) {
 
   if ("error" in prepare) return prepare;
 
+  const { bucket, path, token, videoId, contentType } = prepare.data.upload;
+
   try {
-    await uploadFileViaSignedUrl(prepare.data.upload.signedUrl, file);
-  } catch {
-    return { error: "Upload failed", code: "NETWORK_ERROR" };
+    await uploadFileViaSignedUrl(
+      { bucket, path, token, contentType },
+      file,
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Upload failed";
+    return { error: message, code: "NETWORK_ERROR" };
   }
 
   return guestJsonFetch<{ video: SafeVideo }>("/api/video/upload/complete", {
     method: "POST",
     body: JSON.stringify({
-      videoId: prepare.data.upload.videoId,
-      mimeType: file.type,
+      videoId,
+      mimeType: contentType ?? file.type,
       size: file.size,
       durationSeconds,
       fileName: file.name,

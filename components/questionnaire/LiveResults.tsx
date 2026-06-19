@@ -1,7 +1,6 @@
 "use client";
 
 import { useLocale } from "@/components/providers/LocaleProvider";
-import { localizeOptionText, localizeQuestionText } from "@/lib/i18n/questionnaire-locale";
 import type { QuestionResult } from "@/services/vote.service";
 
 interface LiveResultsProps {
@@ -17,7 +16,7 @@ export function LiveResults({ results }: LiveResultsProps) {
       {results.map((question) => (
         <div key={question.question_id} className="live-results-question">
           <h3 className="flow-question-title">
-            {localizeQuestionText(question.question_id, locale, question.question_text)}
+            {locale === "ar" ? question.question_text_ar : question.question_text}
           </h3>
           <p className="flow-meta">
             {question.total_votes} {t("questionnaireUi.votes")}
@@ -27,7 +26,7 @@ export function LiveResults({ results }: LiveResultsProps) {
               <li key={option.answer} className="live-results-row">
                 <div className="live-results-label">
                   <span>
-                    {localizeOptionText(question.question_id, option.answer, locale)}
+                    {locale === "ar" ? option.label_ar : option.label_en}
                   </span>
                   <span>
                     {option.percentage}% ({option.count})

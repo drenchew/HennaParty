@@ -7,7 +7,6 @@ import { SceneShell } from "@/components/experience/SceneShell";
 import { QuestionnaireVoting } from "@/components/questionnaire/QuestionnaireVoting";
 import { useFlowContext } from "@/components/providers/FlowProvider";
 import { useLocale } from "@/components/providers/LocaleProvider";
-import { QUESTIONNAIRE } from "@/lib/questionnaire/constants";
 import { completeStep } from "@/services/mock/flow.service";
 
 export function QuestionnaireScene() {
@@ -15,8 +14,10 @@ export function QuestionnaireScene() {
   const { nextStep, prevStep } = useExperienceContext();
   const { t } = useLocale();
   const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [questionCount, setQuestionCount] = useState(0);
 
-  const allAnswered = QUESTIONNAIRE.every((q) => Boolean(answers[q.id]));
+  const allAnswered =
+    questionCount > 0 && Object.keys(answers).length >= questionCount;
 
   async function handleFinish() {
     if (!allAnswered) return false;
@@ -40,7 +41,10 @@ export function QuestionnaireScene() {
         />
       }
     >
-      <QuestionnaireVoting onVotesChange={setAnswers} />
+      <QuestionnaireVoting
+        onVotesChange={setAnswers}
+        onQuestionCountChange={setQuestionCount}
+      />
     </SceneShell>
   );
 }

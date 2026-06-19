@@ -7,9 +7,10 @@ import {
   unauthorized,
 } from "@/lib/api/response";
 import {
-  formatQuestionsForClient,
+  getClientQuestions,
   getGuestVotes,
   getLiveResults,
+  getQuestionnaireQuestionCountForGuest,
   submitVoteForGuest,
 } from "@/lib/vote/server";
 
@@ -24,16 +25,18 @@ export async function GET(request: NextRequest) {
     if (!guestToken) return unauthorized();
 
     const includeResults = request.nextUrl.searchParams.get("results") === "true";
-    const [questions, votes] = await Promise.all([
-      Promise.resolve(formatQuestionsForClient()),
+    const [questions, votes, question_count] = await Promise.all([
+      getClientQuestions(),
       getGuestVotes(guestToken),
+      getQuestionnaireQuestionCountForGuest(),
     ]);
 
     const payload: {
-      questions: ReturnType<typeof formatQuestionsForClient>;
+      questions: Awaited<ReturnType<typeof getClientQuestions>>;
       votes: Record<number, string>;
+      question_count: number;
       results?: Awaited<ReturnType<typeof getLiveResults>>;
-    } = { questions, votes };
+    } = { questions, votes, question_count };
 
     if (includeResults) {
       payload.results = await getLiveResults();

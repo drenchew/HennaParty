@@ -1,5 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { QUESTIONNAIRE_QUESTION_COUNT } from "@/lib/constants/questionnaire";
+import { getQuestionnaireQuestionCount } from "@/lib/questionnaire/server";
 import type { Guest, GuestProgress } from "@/types";
 
 const GUEST_COLUMNS = "id, guest_token, created_at, hijabi";
@@ -106,7 +106,8 @@ export async function getGuestProgress(guestId: string): Promise<GuestProgress> 
   const photoCount = photosResult.count ?? 0;
   const hasMessage = Boolean(messageResult.data);
   const votesCount = votesResult.count ?? 0;
-  const questionnaireComplete = votesCount >= QUESTIONNAIRE_QUESTION_COUNT;
+  const questionCount = await getQuestionnaireQuestionCount();
+  const questionnaireComplete = votesCount >= questionCount;
 
   const progress = {
     hasDua,

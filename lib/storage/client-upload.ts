@@ -1,48 +1,42 @@
 "use client";
 
+import { createBrowserClient } from "@/lib/supabase/client";
+
 const CACHE_CONTROL = "3600";
 
+export interface SignedUploadTarget {
+  bucket: string;
+  path: string;
+  token: string;
+  contentType?: string;
+}
+
 /**
- * POST file bytes directly to Supabase Storage via a signed upload URL.
- * Bypasses Vercel's request body limit entirely.
+ * Upload file bytes directly to Supabase Storage using a signed upload token.
+ * Uses the Supabase JS client so apikey/auth headers are sent correctly.
  */
-export function uploadFileViaSignedUrl(
-  signedUrl: string,
+export async function uploadFileViaSignedUrl(
+  target: SignedUploadTarget,
   file: File,
   onProgress?: (percent: number) => void,
 ): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const formData = new FormData();
-    formData.append("cacheControl", CACHE_CONTROL);
-    formData.append("", file);
+  onProgress?.(0);
 
-    const xhr = new XMLHttpRequest();
+  const supabase = createBrowserClient();
+  const contentType =
+    target.contentType ?? (file.type.split(";")[0]?.trim() || undefined);
 
-    if (onProgress) {
-      xhr.upload.addEventListener("progress", (event) => {
-        if (event.lengthComputable) {
-          onProgress(Math.round((event.loaded / event.total) * 100));
-        }
-      });
-    }
-
-    xhr.addEventListener("load", () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        resolve();
-        return;
-      }
-      reject(new Error(`Direct upload failed (${xhr.status})`));
+  const { error } = await supabase.storage
+    .from(target.bucket)
+    .uploadToSignedUrl(target.path, target.token, file, {
+      contentType,
+      upsert: false,
+      cacheControl: CACHE_CONTROL,
     });
 
-    xhr.addEventListener("error", () => {
-      reject(new Error("Direct upload network error"));
-    });
+  if (error) {
+    throw new Error(error.message);
+  }
 
-    xhr.addEventListener("abort", () => {
-      reject(new Error("Direct upload cancelled"));
-    });
-
-    xhr.open("POST", signedUrl);
-    xhr.send(formData);
-  });
+  onProgress?.(100);
 }

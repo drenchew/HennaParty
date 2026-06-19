@@ -2,11 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useLocale } from "@/components/providers/LocaleProvider";
-import { QUESTIONNAIRE_QUESTION_COUNT } from "@/lib/questionnaire/constants";
-import {
-  localizeOptionText,
-  localizeQuestionText,
-} from "@/lib/i18n/questionnaire-locale";
 import { isApiError } from "@/lib/utils/api";
 import {
   getVoteState,
@@ -18,15 +13,29 @@ import { LiveResults } from "./LiveResults";
 
 interface QuestionnaireVotingProps {
   onVotesChange?: (votes: Record<number, string>) => void;
+  onQuestionCountChange?: (count: number) => void;
   showLiveResults?: boolean;
+}
+
+function questionLabel(question: VoteQuestion, locale: "en" | "ar"): string {
+  return locale === "ar" ? question.question_text_ar : question.question_text;
+}
+
+function optionLabel(
+  option: VoteQuestion["options"][number],
+  locale: "en" | "ar",
+): string {
+  return locale === "ar" ? option.label_ar : option.label_en;
 }
 
 export function QuestionnaireVoting({
   onVotesChange,
+  onQuestionCountChange,
   showLiveResults: showLiveResultsDefault = false,
 }: QuestionnaireVotingProps) {
   const { t, locale } = useLocale();
   const [questions, setQuestions] = useState<VoteQuestion[]>([]);
+  const [questionCount, setQuestionCount] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [results, setResults] = useState<QuestionResult[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,6 +52,8 @@ export function QuestionnaireVoting({
       }
 
       setQuestions(response.data.questions);
+      setQuestionCount(response.data.question_count);
+      onQuestionCountChange?.(response.data.question_count);
       setAnswers(response.data.votes);
       onVotesChange?.(response.data.votes);
       if (response.data.results) {
@@ -50,7 +61,7 @@ export function QuestionnaireVoting({
       }
       return true;
     },
-    [onVotesChange],
+    [onQuestionCountChange, onVotesChange],
   );
 
   useEffect(() => {
@@ -94,7 +105,7 @@ export function QuestionnaireVoting({
   }
 
   const answeredCount = Object.keys(answers).length;
-  const allAnswered = answeredCount >= QUESTIONNAIRE_QUESTION_COUNT;
+  const allAnswered = questionCount > 0 && answeredCount >= questionCount;
 
   if (loading) {
     return <p className="flow-loading">{t("questionnaireUi.loading")}</p>;
@@ -104,7 +115,7 @@ export function QuestionnaireVoting({
     <div className="flow-stack">
       <div className="flow-card flow-stack questionnaire-toolbar">
         <p className="flow-meta">
-          {answeredCount} / {QUESTIONNAIRE_QUESTION_COUNT} {t("questionnaireUi.answered")}
+          {answeredCount} / {questionCount} {t("questionnaireUi.answered")}
           {allAnswered && t("questionnaireUi.complete")}
         </p>
         <button
@@ -119,7 +130,7 @@ export function QuestionnaireVoting({
       {questions.map((question) => (
         <fieldset key={question.id} className="flow-card flow-question">
           <legend className="flow-question-title">
-            {localizeQuestionText(question.id, locale, question.question_text)}
+            {questionLabel(question, locale)}
           </legend>
           <div className="flow-options">
             {question.options.map((option) => {
@@ -135,7 +146,7 @@ export function QuestionnaireVoting({
                   aria-pressed={selected}
                   onClick={() => void handleSelect(question.id, canonical)}
                 >
-                  {localizeOptionText(question.id, canonical, locale)}
+                  {optionLabel(option, locale)}
                 </button>
               );
             })}

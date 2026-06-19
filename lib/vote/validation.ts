@@ -1,9 +1,12 @@
-import { isValidAnswer } from "@/lib/questionnaire/constants";
+import { isValidAnswer } from "@/lib/questionnaire/server";
 
-export function validateVotePayload(
+export async function validateVotePayload(
   questionId: unknown,
   answer: unknown,
-): { ok: true; question_id: number; answer: string } | { ok: false; code: string; error: string } {
+): Promise<
+  | { ok: true; question_id: number; answer: string }
+  | { ok: false; code: string; error: string }
+> {
   const id = Number(questionId);
   const text = typeof answer === "string" ? answer.trim() : "";
 
@@ -15,7 +18,7 @@ export function validateVotePayload(
     return { ok: false, code: "INVALID_PAYLOAD", error: "answer is required" };
   }
 
-  if (!isValidAnswer(id, text)) {
+  if (!(await isValidAnswer(id, text))) {
     return { ok: false, code: "INVALID_VOTE", error: "Invalid question or answer option" };
   }
 

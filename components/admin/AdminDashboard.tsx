@@ -20,7 +20,7 @@ const TABS = [
   { id: "videos", label: "Videos" },
   { id: "duas", label: "Duas" },
   { id: "messages", label: "Advice" },
-  { id: "questionnaire", label: "Results" },
+  { id: "questionnaire", label: "Questions" },
   { id: "reset", label: "Reset" },
 ] as const;
 

@@ -512,4 +512,11 @@ export async function getAdminQuestionnaireResults() {
   return getLiveResults();
 }
 
+export {
+  listQuestionnaireQuestions,
+  updateQuestionnaireQuestionForAdmin,
+} from "@/lib/questionnaire/server";
+
+export type { QuestionnaireQuestion } from "@/lib/questionnaire/types";
+
 export { listMessagesForAdmin };

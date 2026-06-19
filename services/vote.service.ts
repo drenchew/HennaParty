@@ -4,10 +4,13 @@ import type { ApiResponse } from "@/types";
 export interface VoteQuestion {
   id: number;
   question_text: string;
+  question_text_ar: string;
   options: Array<{
     id: number;
     question_id: number;
     option_text: string;
+    label_en: string;
+    label_ar: string;
   }>;
 }
 
@@ -21,9 +24,12 @@ export interface VoteRecord {
 export interface QuestionResult {
   question_id: number;
   question_text: string;
+  question_text_ar: string;
   total_votes: number;
   options: Array<{
     answer: string;
+    label_en: string;
+    label_ar: string;
     count: number;
     percentage: number;
   }>;
@@ -32,6 +38,7 @@ export interface QuestionResult {
 export interface VoteStateResponse {
   questions: VoteQuestion[];
   votes: Record<number, string>;
+  question_count: number;
   results?: QuestionResult[];
 }
 

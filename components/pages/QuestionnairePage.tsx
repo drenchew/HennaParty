@@ -6,15 +6,16 @@ import { FlowNav } from "@/components/layout/FlowNavigation";
 import { StepGuard } from "@/components/layout/StepGuard";
 import { QuestionnaireVoting } from "@/components/questionnaire/QuestionnaireVoting";
 import { useFlowContext } from "@/components/providers/FlowProvider";
-import { QUESTIONNAIRE } from "@/lib/questionnaire/constants";
 import { STEP_ROUTES } from "@/lib/constants/steps";
 import { completeStep } from "@/services/mock/flow.service";
 
 export function QuestionnairePage() {
   const { refresh, nextRoute } = useFlowContext();
   const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [questionCount, setQuestionCount] = useState(0);
 
-  const allAnswered = QUESTIONNAIRE.every((q) => Boolean(answers[q.id]));
+  const allAnswered =
+    questionCount > 0 && Object.keys(answers).length >= questionCount;
 
   async function handleFinish(): Promise<boolean> {
     if (!allAnswered) return false;
@@ -39,7 +40,10 @@ export function QuestionnairePage() {
           />
         }
       >
-        <QuestionnaireVoting onVotesChange={setAnswers} />
+        <QuestionnaireVoting
+          onVotesChange={setAnswers}
+          onQuestionCountChange={setQuestionCount}
+        />
       </FlowLayout>
     </StepGuard>
   );

@@ -274,6 +274,13 @@
     font-family: inherit;
   }
 
+  .flow-input {
+    @apply w-full rounded-xl border bg-transparent px-3 py-2 text-sm outline-none focus:ring-2;
+    border-color: color-mix(in srgb, var(--henna-accent) 35%, transparent);
+    color: var(--henna-text);
+    font-family: inherit;
+  }
+
   [dir="rtl"] .flow-textarea {
     @apply text-base leading-loose;
   }
@@ -336,7 +343,12 @@
   }
 
   .flow-video-preview {
-    @apply aspect-video min-h-[12rem] w-full rounded-xl bg-black object-cover;
+    @apply aspect-video max-h-[38dvh] min-h-[10rem] w-full rounded-xl bg-black object-contain;
+  }
+
+  .flow-video-hint {
+    @apply text-center text-xs leading-relaxed;
+    color: var(--henna-muted);
   }
 
   .flow-video-timer {
@@ -540,6 +552,36 @@
 
   .admin-reset-form {
     @apply flex flex-col gap-3;
+  }
+
+  .admin-question-edit-list {
+    @apply flex flex-col gap-4;
+  }
+
+  .admin-question-edit-note {
+    @apply mb-2;
+  }
+
+  .admin-question-edit {
+    @apply flex flex-col gap-3;
+  }
+
+  .admin-option-edit-list {
+    @apply flex flex-col gap-3;
+  }
+
+  .admin-option-edit {
+    @apply flex flex-col gap-2 border-t pt-3;
+    border-color: color-mix(in srgb, var(--henna-gold) 18%, transparent);
+  }
+
+  .admin-field {
+    @apply flex flex-col gap-1;
+  }
+
+  .admin-field__label {
+    @apply text-xs;
+    color: var(--henna-muted);
   }
 
   .admin-question-list {
@@ -928,7 +970,7 @@
   }
 
   .experience-glass {
-    @apply relative flex max-h-[92dvh] w-full flex-col gap-4 overflow-y-auto px-3 py-5;
+    @apply relative flex max-h-[92dvh] w-full flex-col gap-4 overflow-hidden px-3 py-5;
     background: var(--henna-glass);
     border: 1px solid var(--henna-glass-border);
     box-shadow: var(--henna-shadow);
@@ -982,11 +1024,13 @@
   }
 
   .experience-body {
-    @apply flex-1;
+    @apply min-h-0 flex-1 overflow-y-auto;
   }
 
   .experience-footer {
-    @apply pt-1;
+    @apply shrink-0 border-t pt-3;
+    border-color: color-mix(in srgb, var(--henna-gold) 18%, transparent);
+    background: color-mix(in srgb, var(--henna-glass) 92%, transparent);
   }
 
   .experience-nav {

@@ -126,6 +126,11 @@ export function VideoPage() {
             <VideoCapsuleUpload
               onVideoReady={handleVideoReady}
               onClear={handleClear}
+              onConfirm={() => void handleContinue()}
+              confirmLabel={
+                uploading ? "Uploading…" : "Save & Continue"
+              }
+              confirming={uploading}
               disabled={uploading}
             />
           </div>

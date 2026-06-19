@@ -1,8 +1,10 @@
-import { findGuestByToken, upsertGuest } from "@/lib/guest/server";
 import {
-  QUESTIONNAIRE,
-  QUESTIONNAIRE_QUESTION_COUNT,
-} from "@/lib/questionnaire/constants";
+  formatQuestionsForClient,
+  getQuestionnaireQuestionCount,
+  isValidAnswer,
+  listQuestionnaireQuestions,
+} from "@/lib/questionnaire/server";
+import { findGuestByToken, upsertGuest } from "@/lib/guest/server";
 import { validateVotePayload } from "@/lib/vote/validation";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -16,24 +18,20 @@ export interface VoteRecord {
 export interface QuestionResult {
   question_id: number;
   question_text: string;
+  question_text_ar: string;
   total_votes: number;
   options: Array<{
     answer: string;
+    label_en: string;
+    label_ar: string;
     count: number;
     percentage: number;
   }>;
 }
 
-export function formatQuestionsForClient() {
-  return QUESTIONNAIRE.map((q) => ({
-    id: q.id,
-    question_text: q.question_text,
-    options: q.options.map((option_text, index) => ({
-      id: index + 1,
-      question_id: q.id,
-      option_text,
-    })),
-  }));
+export async function getClientQuestions() {
+  const questions = await listQuestionnaireQuestions();
+  return formatQuestionsForClient(questions);
 }
 
 export async function getGuestVotes(
@@ -62,7 +60,7 @@ export async function submitVoteForGuest(
   questionId: unknown,
   answer: unknown,
 ): Promise<VoteRecord> {
-  const validation = validateVotePayload(questionId, answer);
+  const validation = await validateVotePayload(questionId, answer);
   if (!validation.ok) {
     throw new Error(`${validation.code}:${validation.error}`);
   }
@@ -91,20 +89,24 @@ export async function submitVoteForGuest(
 
 export async function getLiveResults(): Promise<QuestionResult[]> {
   const supabase = createAdminClient();
-  const { data, error } = await supabase
-    .from("votes")
-    .select("question_id, answer");
+  const [questions, votesResult] = await Promise.all([
+    listQuestionnaireQuestions(),
+    supabase.from("votes").select("question_id, answer"),
+  ]);
 
-  if (error) throw error;
+  if (votesResult.error) throw votesResult.error;
+  const votes = votesResult.data ?? [];
 
-  return QUESTIONNAIRE.map((question) => {
-    const rows = (data ?? []).filter((v) => v.question_id === question.id);
+  return questions.map((question) => {
+    const rows = votes.filter((vote) => vote.question_id === question.id);
     const total = rows.length;
 
     const options = question.options.map((option) => {
-      const count = rows.filter((r) => r.answer === option).length;
+      const count = rows.filter((row) => row.answer === option.answer).length;
       return {
-        answer: option,
+        answer: option.answer,
+        label_en: option.en,
+        label_ar: option.ar,
         count,
         percentage: total > 0 ? Math.round((count / total) * 100) : 0,
       };
@@ -112,15 +114,23 @@ export async function getLiveResults(): Promise<QuestionResult[]> {
 
     return {
       question_id: question.id,
-      question_text: question.question_text,
+      question_text: question.question_en,
+      question_text_ar: question.question_ar,
       total_votes: total,
       options,
     };
   });
 }
 
-export function isQuestionnaireComplete(votes: Record<number, string>): boolean {
-  return QUESTIONNAIRE.every((q) => Boolean(votes[q.id]));
+export async function isQuestionnaireComplete(
+  votes: Record<number, string>,
+): Promise<boolean> {
+  const questions = await listQuestionnaireQuestions();
+  return questions.every((question) => Boolean(votes[question.id]));
 }
 
-export { QUESTIONNAIRE_QUESTION_COUNT };
+export async function getQuestionnaireQuestionCountForGuest(): Promise<number> {
+  return getQuestionnaireQuestionCount();
+}
+
+export { isValidAnswer };

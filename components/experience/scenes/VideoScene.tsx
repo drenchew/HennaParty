@@ -119,6 +119,7 @@ export function VideoScene() {
             }
             onContinue={handleContinue}
             continueDisabled={uploading || (!uploaded && !pendingFile)}
+            showContinue={Boolean(uploaded || pendingFile || uploading)}
           />
         ) : !loading ? (
           <ExperienceNav onBack={prevStep} showContinue={false} />
@@ -145,6 +146,11 @@ export function VideoScene() {
               <VideoCapsuleUpload
                 onVideoReady={handleVideoReady}
                 onClear={handleClear}
+                onConfirm={() => void handleContinue()}
+                confirmLabel={
+                  uploading ? t("video.uploading") : t("video.saveContinue")
+                }
+                confirming={uploading}
                 disabled={uploading}
               />
             </OrnamentalCard>

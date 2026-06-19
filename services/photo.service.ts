@@ -60,6 +60,7 @@ export function uploadPhotoWithProgress(
         token: string;
         signedUrl: string;
         photoId: string;
+        contentType: string;
       };
     }>("/api/photo/upload/prepare", {
       method: "POST",
@@ -68,17 +69,24 @@ export function uploadPhotoWithProgress(
 
     if ("error" in prepare) return prepare;
 
+    const { bucket, path, token, photoId, contentType } = prepare.data.upload;
+
     try {
-      await uploadFileViaSignedUrl(prepare.data.upload.signedUrl, file, onProgress);
-    } catch {
-      return { error: "Upload failed", code: "NETWORK_ERROR" };
+      await uploadFileViaSignedUrl(
+        { bucket, path, token, contentType },
+        file,
+        onProgress,
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Upload failed";
+      return { error: message, code: "NETWORK_ERROR" };
     }
 
     return guestJsonFetch<{ photo: PhotoItem }>("/api/photo/upload/complete", {
       method: "POST",
       body: JSON.stringify({
-        photoId: prepare.data.upload.photoId,
-        mimeType: file.type,
+        photoId,
+        mimeType: contentType,
       }),
     });
   })();

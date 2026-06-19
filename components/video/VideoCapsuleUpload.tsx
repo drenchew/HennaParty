@@ -14,6 +14,9 @@ import {
 export interface VideoCapsuleUploadProps {
   onVideoReady: (file: File, durationSeconds: number) => void;
   onClear?: () => void;
+  onConfirm?: () => void | Promise<void>;
+  confirmLabel?: string;
+  confirming?: boolean;
   disabled?: boolean;
 }
 
@@ -22,6 +25,9 @@ type Mode = "choose" | "recording" | "preview";
 export function VideoCapsuleUpload({
   onVideoReady,
   onClear,
+  onConfirm,
+  confirmLabel,
+  confirming = false,
   disabled,
 }: VideoCapsuleUploadProps) {
   const { t } = useLocale();
@@ -151,10 +157,19 @@ export function VideoCapsuleUpload({
         const recordedMime = recorder.mimeType || mimeType || "video/webm";
         const blob = new Blob(chunksRef.current, { type: recordedMime });
         const file = fileFromRecordedBlob(blob, recordedMime);
+        const recordedDuration = Math.max(1, elapsedRef.current);
 
         void getVideoFileDuration(file)
-          .then((d) => setReadyFile(file, d))
-          .catch(() => setReadyFile(file, elapsedRef.current || 1));
+          .then((metadataDuration) => {
+            const duration =
+              Number.isFinite(metadataDuration) &&
+              metadataDuration > 0 &&
+              metadataDuration <= MAX_VIDEO_DURATION_SECONDS
+                ? metadataDuration
+                : recordedDuration;
+            setReadyFile(file, duration);
+          })
+          .catch(() => setReadyFile(file, recordedDuration));
       };
 
       recorder.start(500);
@@ -243,9 +258,10 @@ export function VideoCapsuleUpload({
           <div className="flow-video-timer" data-warning={remaining <= 10}>
             {formatDuration(elapsed)} / {formatDuration(MAX_VIDEO_DURATION_SECONDS)}
           </div>
+          <p className="flow-video-hint">{t("videoUpload.recordingHint")}</p>
           <button
             type="button"
-            className="flow-btn flow-btn--secondary"
+            className="flow-btn flow-btn--primary"
             onClick={handleStopRecording}
           >
             {t("videoUpload.stop")}
@@ -259,6 +275,16 @@ export function VideoCapsuleUpload({
           <p className="flow-success">
             {t("videoUpload.ready")}: <strong>{fileName}</strong> ({formatDuration(duration)})
           </p>
+          {onConfirm && confirmLabel ? (
+            <button
+              type="button"
+              className="flow-btn flow-btn--primary"
+              disabled={disabled || confirming}
+              onClick={() => void onConfirm()}
+            >
+              {confirmLabel}
+            </button>
+          ) : null}
           {!disabled && (
             <button type="button" className="flow-btn flow-btn--secondary" onClick={handleRetake}>
               {t("videoUpload.retake")}
