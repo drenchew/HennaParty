@@ -19,6 +19,7 @@ const MIGRATION_FILES = [
   "supabase/migrations/20250615000001_seed_duas.sql",
   "supabase/migrations/20250615000002_dua_acceptance.sql",
   "supabase/migrations/20250617000000_guest_hijabi_media.sql",
+  "supabase/migrations/20250618000000_questionnaire_questions.sql",
 ];
 
 function loadEnvLocal() {

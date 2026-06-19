@@ -1,3 +1,4 @@
+import { isSchemaNotInitialized } from "@/lib/api/supabase-errors";
 import { QUESTIONNAIRE as DEFAULT_QUESTIONNAIRE } from "@/lib/questionnaire/constants";
 import type {
   QuestionnaireOption,
@@ -99,7 +100,7 @@ export async function listQuestionnaireQuestions(): Promise<QuestionnaireQuestio
     .order("id", { ascending: true });
 
   if (error) {
-    if (error.code === "42P01") {
+    if (isSchemaNotInitialized(error)) {
       return defaultQuestionsFromConstants();
     }
     throw error;
@@ -208,7 +209,14 @@ export async function updateQuestionnaireQuestionForAdmin(
     .eq("id", id)
     .maybeSingle();
 
-  if (fetchError) throw fetchError;
+  if (fetchError) {
+    if (isSchemaNotInitialized(fetchError)) {
+      throw new Error(
+        "SCHEMA_NOT_INITIALIZED:Run npm run db:setup to enable questionnaire editing",
+      );
+    }
+    throw fetchError;
+  }
   if (!existing) throw new Error("NOT_FOUND:Question not found");
 
   for (const option of input.options) {

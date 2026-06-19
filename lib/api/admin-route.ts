@@ -6,6 +6,7 @@ const CLIENT_ERROR_CODES = new Set([
   "INVALID_PAYLOAD",
   "NOT_FOUND",
   "CONFIRM_REQUIRED",
+  "SCHEMA_NOT_INITIALIZED",
 ]);
 
 export function withAdminAuth(
