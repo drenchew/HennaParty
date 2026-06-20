@@ -211,7 +211,7 @@ export function VideoCapsuleUpload({
       setUploadMode("recording");
       setElapsed(0);
 
-      const recorder = createVideoRecorder(stream);
+      const recorder = await createVideoRecorder(stream);
       recorderRef.current = recorder;
       recorder.startRecording();
 
