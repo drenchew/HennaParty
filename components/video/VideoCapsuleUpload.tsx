@@ -3,14 +3,18 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useLocale } from "@/components/providers/LocaleProvider";
 import { MAX_VIDEO_DURATION_SECONDS } from "@/lib/constants/steps";
-import { createVideoRecorder } from "@/lib/video/recordrtc-client";
+import {
+  createBrowserVideoRecorder,
+  preloadRecordRtcModule,
+  type BrowserVideoRecorder,
+} from "@/lib/video/browser-recorder";
+import { CameraAccessError, getCameraStream } from "@/lib/video/camera-stream";
 import {
   fileFromRecordedBlob,
   formatDuration,
   getVideoFileDuration,
   validateDuration,
 } from "@/lib/utils/video-metadata";
-import type RecordRTC from "recordrtc";
 
 export type VideoUploadMode = "choose" | "recording" | "processing" | "preview";
 
@@ -42,7 +46,7 @@ export function VideoCapsuleUpload({
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const recorderRef = useRef<RecordRTC | null>(null);
+  const recorderRef = useRef<BrowserVideoRecorder | null>(null);
   const stoppingRef = useRef(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const elapsedRef = useRef(0);
@@ -73,15 +77,31 @@ export function VideoCapsuleUpload({
   }, []);
 
   const destroyRecorder = useCallback(() => {
-    const recorder = recorderRef.current;
-    if (!recorder) return;
-    try {
-      recorder.destroy();
-    } catch {
-      // Already destroyed.
-    }
+    recorderRef.current?.destroy();
     recorderRef.current = null;
   }, []);
+
+  const cameraErrorMessage = useCallback(
+    (cause: unknown) => {
+      if (cause instanceof CameraAccessError) {
+        switch (cause.code) {
+          case "NOT_ALLOWED":
+            return t("videoUpload.cameraPermissionDenied");
+          case "NOT_FOUND":
+            return t("videoUpload.cameraNotFound");
+          case "INSECURE_CONTEXT":
+            return t("videoUpload.cameraInsecure");
+          case "NO_CAMERA_API":
+          case "UNKNOWN":
+          default:
+            return t("videoUpload.cameraUnavailable");
+        }
+      }
+
+      return t("videoUpload.cameraUnavailable");
+    },
+    [t],
+  );
 
   useEffect(() => {
     previewUrlRef.current = previewUrl;
@@ -108,13 +128,13 @@ export function VideoCapsuleUpload({
     video.playsInline = true;
 
     void video.play().catch(() => {
-      setError(t("videoUpload.cameraError"));
+      // Autoplay can fail on some browsers even when recording works.
     });
 
     return () => {
       video.srcObject = null;
     };
-  }, [mode, t]);
+  }, [mode]);
 
   function translateDurationError(message: string | null): string | null {
     if (!message) return null;
@@ -198,22 +218,15 @@ export function VideoCapsuleUpload({
     stoppingRef.current = false;
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: "user",
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-        },
-        audio: true,
-      });
-
+      const stream = await getCameraStream();
       streamRef.current = stream;
-      setUploadMode("recording");
-      setElapsed(0);
 
-      const recorder = await createVideoRecorder(stream);
+      const recorder = await createBrowserVideoRecorder(stream);
       recorderRef.current = recorder;
       recorder.startRecording();
+
+      setUploadMode("recording");
+      setElapsed(0);
 
       timerRef.current = setInterval(() => {
         elapsedRef.current += 1;
@@ -223,10 +236,11 @@ export function VideoCapsuleUpload({
           handleStopRecording();
         }
       }, 1000);
-    } catch {
+    } catch (cause) {
+      clearTimer();
       destroyRecorder();
       stopStream();
-      setError(t("videoUpload.cameraError"));
+      setError(cameraErrorMessage(cause));
       setUploadMode("choose");
     }
   }
@@ -269,6 +283,7 @@ export function VideoCapsuleUpload({
           <button
             type="button"
             className="flow-btn flow-btn--primary"
+            onPointerDown={() => preloadRecordRtcModule()}
             onClick={() => void handleStartRecording()}
             disabled={disabled}
           >

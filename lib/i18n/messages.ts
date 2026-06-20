@@ -145,6 +145,10 @@ export const messages: Record<Locale, MessageTree> = {
       tooLong: "يجب أن يكون الفيديو {max} ثانية أو أقل",
       readError: "تعذّر قراءة ملف الفيديو. جرّبوا صيغة أخرى.",
       cameraError: "تعذّر الوصول للكاميرا. استخدموا رفع ملف.",
+      cameraPermissionDenied: "تم رفض إذن الكاميرا. فعّلوا الكاميرا والميكروفون من إعدادات المتصفح ثم أعيدوا المحاولة.",
+      cameraNotFound: "لم يُعثر على كاميرا. استخدموا رفع ملف.",
+      cameraInsecure: "التسجيل يعمل فقط عبر HTTPS. افتحوا الرابط الآمن للموقع.",
+      cameraUnavailable: "تعذّر بدء التسجيل. جرّبوا مرة أخرى أو ارفعوا ملف فيديو.",
     },
     questionnaireUi: {
       loading: "جاري تحميل الاستبيان…",
@@ -303,6 +307,10 @@ export const messages: Record<Locale, MessageTree> = {
       tooLong: "Video must be {max} seconds or less",
       readError: "Could not read that video file. Try another format.",
       cameraError: "Could not access camera. Use file upload instead.",
+      cameraPermissionDenied: "Camera permission was denied. Allow camera and microphone in your browser settings, then try again.",
+      cameraNotFound: "No camera was found on this device. Use file upload instead.",
+      cameraInsecure: "Recording only works over HTTPS. Open the secure site URL.",
+      cameraUnavailable: "Could not start recording. Try again or upload a video file.",
     },
     questionnaireUi: {
       loading: "Loading questionnaire…",
