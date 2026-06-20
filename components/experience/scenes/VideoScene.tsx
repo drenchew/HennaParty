@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ExperienceNav } from "@/components/experience/ExperienceNav";
 import { useExperienceContext } from "@/components/experience/ExperienceProvider";
 import { SceneShell } from "@/components/experience/SceneShell";
@@ -8,7 +8,6 @@ import { HijabPreferenceGate } from "@/components/media";
 import { OrnamentalCard } from "@/components/ornamental";
 import {
   VideoCapsuleUpload,
-  type VideoCapsuleUploadHandle,
   type VideoUploadMode,
 } from "@/components/video/VideoCapsuleUpload";
 import { useFlowContext } from "@/components/providers/FlowProvider";
@@ -25,7 +24,6 @@ export function VideoScene() {
   const { nextStep, prevStep, setTransitionLocked } = useExperienceContext();
   const { t } = useLocale();
   const { hijabi: guestHijabi } = useGuestHijabi();
-  const uploadRef = useRef<VideoCapsuleUploadHandle>(null);
   const [uploaded, setUploaded] = useState<SafeVideo | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [pendingDuration, setPendingDuration] = useState(0);
@@ -102,61 +100,39 @@ export function VideoScene() {
     return true;
   }
 
-  function handleFooterPrimary() {
-    if (uploadMode === "recording") {
-      uploadRef.current?.stopRecording();
-      return;
-    }
-    void handleContinue();
-  }
-
   const videoSubtitle =
     guestHijabi === true ? t("video.subtitleHijabi") : t("video.subtitleStandard");
 
   const canUpload = guestHijabi !== null;
 
-  const footerContinueLabel =
-    uploading
-      ? t("video.uploading")
-      : uploaded
-        ? t("common.continue")
-        : uploadMode === "recording"
-          ? t("videoUpload.stop")
-          : t("video.saveContinue");
+  const footerContinueLabel = uploading
+    ? t("video.uploading")
+    : uploaded
+      ? t("common.continue")
+      : t("video.saveContinue");
 
   const footerContinueDisabled =
     uploading ||
     uploadMode === "choose" ||
+    uploadMode === "recording" ||
     uploadMode === "processing" ||
     (uploadMode === "preview" && !pendingFile);
-
-  const recordingFooter = uploadMode === "recording";
 
   return (
     <SceneShell
       step="video"
-      recordingLayout={recordingFooter}
+      recordingLayout={uploadMode === "recording"}
       title={t("video.title")}
       subtitle={canUpload ? videoSubtitle : t("media.hijabIntro")}
       footer={
         !loading && canUpload ? (
-          recordingFooter ? (
-            <button
-              type="button"
-              className="flow-btn flow-btn--primary flow-video-stop-btn"
-              onClick={() => uploadRef.current?.stopRecording()}
-            >
-              {t("videoUpload.stop")}
-            </button>
-          ) : (
-            <ExperienceNav
-              onBack={prevStep}
-              continueLabel={footerContinueLabel}
-              onContinue={handleFooterPrimary}
-              continueDisabled={footerContinueDisabled}
-              showContinue={!uploaded}
-            />
-          )
+          <ExperienceNav
+            onBack={prevStep}
+            continueLabel={footerContinueLabel}
+            onContinue={() => void handleContinue()}
+            continueDisabled={footerContinueDisabled}
+            showContinue={!uploaded && uploadMode !== "recording"}
+          />
         ) : !loading ? (
           <ExperienceNav onBack={prevStep} showContinue={false} />
         ) : null
@@ -180,11 +156,9 @@ export function VideoScene() {
           ) : (
             <OrnamentalCard className="ornamental-card--flush">
               <VideoCapsuleUpload
-                ref={uploadRef}
                 onVideoReady={handleVideoReady}
                 onClear={handleClear}
                 onModeChange={setUploadMode}
-                controlsInFooter
                 disabled={uploading}
               />
             </OrnamentalCard>

@@ -372,7 +372,7 @@
   }
 
   .flow-video-stop-btn {
-    @apply shrink-0;
+    @apply min-h-[3rem] w-full shrink-0 text-base;
   }
 
   .experience-scene[data-recording="true"] .experience-header--compact {

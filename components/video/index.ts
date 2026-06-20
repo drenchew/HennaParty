@@ -1,5 +1,1 @@
-export {
-  VideoCapsuleUpload,
-  type VideoCapsuleUploadHandle,
-  type VideoUploadMode,
-} from "./VideoCapsuleUpload";
+export { VideoCapsuleUpload, type VideoUploadMode } from "./VideoCapsuleUpload";

@@ -1,51 +1,32 @@
 "use client";
 
-import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale } from "@/components/providers/LocaleProvider";
 import { MAX_VIDEO_DURATION_SECONDS } from "@/lib/constants/steps";
+import { createVideoRecorder } from "@/lib/video/recordrtc-client";
 import {
   fileFromRecordedBlob,
   formatDuration,
   getVideoFileDuration,
-  pickRecorderMimeType,
   validateDuration,
 } from "@/lib/utils/video-metadata";
+import type RecordRTC from "recordrtc";
 
 export type VideoUploadMode = "choose" | "recording" | "processing" | "preview";
-
-export interface VideoCapsuleUploadHandle {
-  stopRecording: () => void;
-}
 
 export interface VideoCapsuleUploadProps {
   onVideoReady: (file: File, durationSeconds: number) => void;
   onClear?: () => void;
   onModeChange?: (mode: VideoUploadMode) => void;
-  /** Hide inline Stop/Save — parent renders them in the scene footer. */
-  controlsInFooter?: boolean;
   disabled?: boolean;
 }
 
-export const VideoCapsuleUpload = forwardRef<
-  VideoCapsuleUploadHandle,
-  VideoCapsuleUploadProps
->(function VideoCapsuleUpload(
-  {
-    onVideoReady,
-    onClear,
-    onModeChange,
-    controlsInFooter = false,
-    disabled,
-  },
-  ref,
-) {
+export function VideoCapsuleUpload({
+  onVideoReady,
+  onClear,
+  onModeChange,
+  disabled,
+}: VideoCapsuleUploadProps) {
   const { t } = useLocale();
   const [mode, setMode] = useState<VideoUploadMode>("choose");
   const [error, setError] = useState<string | null>(null);
@@ -56,8 +37,8 @@ export const VideoCapsuleUpload = forwardRef<
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const recorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
+  const recorderRef = useRef<RecordRTC | null>(null);
+  const stoppingRef = useRef(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const elapsedRef = useRef(0);
   const previewUrlRef = useRef<string | null>(null);
@@ -86,6 +67,17 @@ export const VideoCapsuleUpload = forwardRef<
     if (url) URL.revokeObjectURL(url);
   }, []);
 
+  const destroyRecorder = useCallback(() => {
+    const recorder = recorderRef.current;
+    if (!recorder) return;
+    try {
+      recorder.destroy();
+    } catch {
+      // Already destroyed.
+    }
+    recorderRef.current = null;
+  }, []);
+
   useEffect(() => {
     previewUrlRef.current = previewUrl;
   }, [previewUrl]);
@@ -93,10 +85,11 @@ export const VideoCapsuleUpload = forwardRef<
   useEffect(() => {
     return () => {
       clearTimer();
+      destroyRecorder();
       stopStream();
       revokePreviewUrl(previewUrlRef.current);
     };
-  }, [clearTimer, stopStream, revokePreviewUrl]);
+  }, [clearTimer, destroyRecorder, stopStream, revokePreviewUrl]);
 
   useEffect(() => {
     if (mode !== "recording") return;
@@ -148,47 +141,42 @@ export const VideoCapsuleUpload = forwardRef<
     onVideoReady(file, durationSeconds);
   }
 
-  function finalizeRecording() {
-    const recorder = recorderRef.current;
-    const recordedMime = recorder?.mimeType || pickRecorderMimeType() || "video/webm";
-    const blob = new Blob(chunksRef.current, { type: recordedMime });
-
-    if (blob.size === 0) {
-      setError(t("videoUpload.recordTooShort"));
-      setUploadMode("choose");
-      return;
-    }
-
-    const file = fileFromRecordedBlob(blob, recordedMime);
-    const recordedDuration = Math.max(1, elapsedRef.current);
-    setReadyFile(file, recordedDuration);
-  }
-
   const handleStopRecording = useCallback(() => {
     const recorder = recorderRef.current;
-    if (!recorder || recorder.state !== "recording") return;
+    if (!recorder || stoppingRef.current) return;
 
+    const state = recorder.getState();
+    if (state !== "recording" && state !== "paused") return;
+
+    stoppingRef.current = true;
+    clearTimer();
     setUploadMode("processing");
     setError(null);
 
-    try {
-      recorder.requestData();
-    } catch {
-      // Some browsers omit requestData.
-    }
+    recorder.stopRecording(() => {
+      const blob = recorder.getBlob();
+      destroyRecorder();
+      stopStream();
+      stoppingRef.current = false;
 
-    recorder.stop();
-  }, [setUploadMode]);
+      if (!blob || blob.size === 0) {
+        setError(t("videoUpload.recordTooShort"));
+        setUploadMode("choose");
+        return;
+      }
 
-  useImperativeHandle(ref, () => ({ stopRecording: handleStopRecording }), [
-    handleStopRecording,
-  ]);
+      const mime = blob.type || "video/webm";
+      const file = fileFromRecordedBlob(blob, mime);
+      const recordedDuration = Math.max(1, elapsedRef.current);
+      setReadyFile(file, recordedDuration);
+    });
+  }, [clearTimer, destroyRecorder, setUploadMode, stopStream, t]);
 
   async function handleStartRecording() {
     if (disabled) return;
     setError(null);
-    chunksRef.current = [];
     elapsedRef.current = 0;
+    stoppingRef.current = false;
 
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -204,31 +192,9 @@ export const VideoCapsuleUpload = forwardRef<
       setUploadMode("recording");
       setElapsed(0);
 
-      const mimeType = pickRecorderMimeType();
-      const recorder = mimeType
-        ? new MediaRecorder(stream, { mimeType })
-        : new MediaRecorder(stream);
-
+      const recorder = createVideoRecorder(stream);
       recorderRef.current = recorder;
-
-      recorder.ondataavailable = (event) => {
-        if (event.data.size > 0) chunksRef.current.push(event.data);
-      };
-
-      recorder.onstop = () => {
-        clearTimer();
-        stopStream();
-        window.setTimeout(() => finalizeRecording(), 150);
-      };
-
-      recorder.onerror = () => {
-        clearTimer();
-        stopStream();
-        setError(t("videoUpload.cameraError"));
-        setUploadMode("choose");
-      };
-
-      recorder.start(250);
+      recorder.startRecording();
 
       timerRef.current = setInterval(() => {
         elapsedRef.current += 1;
@@ -239,8 +205,9 @@ export const VideoCapsuleUpload = forwardRef<
         }
       }, 1000);
     } catch {
-      setError(t("videoUpload.cameraError"));
+      destroyRecorder();
       stopStream();
+      setError(t("videoUpload.cameraError"));
       setUploadMode("choose");
     }
   }
@@ -312,20 +279,15 @@ export const VideoCapsuleUpload = forwardRef<
           <div className="flow-video-timer" data-warning={remaining <= 10}>
             {formatDuration(elapsed)} / {formatDuration(MAX_VIDEO_DURATION_SECONDS)}
           </div>
-          <p className="flow-video-hint">
-            {controlsInFooter
-              ? t("videoUpload.recordingFooterHint")
-              : t("videoUpload.recordingHint")}
-          </p>
-          {!controlsInFooter ? (
-            <button
-              type="button"
-              className="flow-btn flow-btn--primary flow-video-stop-btn"
-              onClick={handleStopRecording}
-            >
-              {t("videoUpload.stop")}
-            </button>
-          ) : null}
+          <p className="flow-video-hint">{t("videoUpload.recordingHint")}</p>
+          <button
+            type="button"
+            className="flow-btn flow-btn--primary flow-video-stop-btn"
+            onPointerDown={(event) => event.preventDefault()}
+            onClick={handleStopRecording}
+          >
+            {t("videoUpload.stop")}
+          </button>
         </div>
       )}
 
@@ -352,4 +314,4 @@ export const VideoCapsuleUpload = forwardRef<
       {error && <p className="flow-error">{error}</p>}
     </div>
   );
-});
+}
