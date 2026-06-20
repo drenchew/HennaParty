@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef } from "react";
 
 const WHEEL_THRESHOLD = 55;
-const SWIPE_THRESHOLD = 60;
 const TRANSITION_COOLDOWN_MS = 900;
 
 interface UseExperienceScrollOptions {
@@ -14,9 +13,26 @@ interface UseExperienceScrollOptions {
   disabled?: boolean;
 }
 
+function findScrollContainer(target: EventTarget | null): HTMLElement | null {
+  if (!(target instanceof Element)) return null;
+  return target.closest<HTMLElement>(".experience-body, [data-scroll-container]");
+}
+
+function canScrollInDirection(element: HTMLElement, direction: "up" | "down"): boolean {
+  const { scrollTop, scrollHeight, clientHeight } = element;
+  const maxScroll = scrollHeight - clientHeight;
+  if (maxScroll <= 1) return false;
+
+  if (direction === "down") {
+    return scrollTop < maxScroll - 1;
+  }
+
+  return scrollTop > 1;
+}
+
 /**
- * Controlled step navigation via wheel, touch swipe, and keyboard.
- * Prevents free multi-step jumps — one gesture = one scene.
+ * Desktop: wheel at scroll boundaries moves one scene.
+ * Mobile: no swipe-to-change-step — use footer buttons only.
  */
 export function useExperienceScroll({
   currentIndex,
@@ -26,7 +42,6 @@ export function useExperienceScroll({
   disabled = false,
 }: UseExperienceScrollOptions) {
   const wheelAccum = useRef(0);
-  const touchStartY = useRef<number | null>(null);
   const lockedUntil = useRef(0);
 
   const canGoNext = currentIndex < maxIndex;
@@ -54,6 +69,19 @@ export function useExperienceScroll({
     if (disabled) return;
 
     function onWheel(event: WheelEvent) {
+      const scrollContainer = findScrollContainer(event.target);
+      if (scrollContainer) {
+        const scrollingDown = event.deltaY > 0;
+        const scrollingUp = event.deltaY < 0;
+
+        if (
+          (scrollingDown && canScrollInDirection(scrollContainer, "down")) ||
+          (scrollingUp && canScrollInDirection(scrollContainer, "up"))
+        ) {
+          return;
+        }
+      }
+
       event.preventDefault();
       wheelAccum.current += event.deltaY;
 
@@ -62,22 +90,6 @@ export function useExperienceScroll({
       } else if (wheelAccum.current <= -WHEEL_THRESHOLD) {
         tryNavigate("prev");
       }
-    }
-
-    function onTouchStart(event: TouchEvent) {
-      touchStartY.current = event.touches[0]?.clientY ?? null;
-    }
-
-    function onTouchEnd(event: TouchEvent) {
-      const start = touchStartY.current;
-      if (start == null) return;
-
-      const endY = event.changedTouches[0]?.clientY ?? start;
-      const delta = start - endY;
-      touchStartY.current = null;
-
-      if (delta >= SWIPE_THRESHOLD) tryNavigate("next");
-      else if (delta <= -SWIPE_THRESHOLD) tryNavigate("prev");
     }
 
     function onKeyDown(event: KeyboardEvent) {
@@ -91,14 +103,10 @@ export function useExperienceScroll({
     }
 
     window.addEventListener("wheel", onWheel, { passive: false });
-    window.addEventListener("touchstart", onTouchStart, { passive: true });
-    window.addEventListener("touchend", onTouchEnd, { passive: true });
     window.addEventListener("keydown", onKeyDown);
 
     return () => {
       window.removeEventListener("wheel", onWheel);
-      window.removeEventListener("touchstart", onTouchStart);
-      window.removeEventListener("touchend", onTouchEnd);
       window.removeEventListener("keydown", onKeyDown);
     };
   }, [disabled, tryNavigate]);

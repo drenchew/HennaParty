@@ -35,12 +35,16 @@ export function ExperienceNav({
   return (
     <div className="experience-nav">
       {showBack && onBack ? (
-        <OrnamentalButton variant="secondary" onClick={onBack}>
+        <OrnamentalButton variant="secondary" onClick={onBack} className="experience-nav__back">
           {resolvedBackLabel}
         </OrnamentalButton>
       ) : null}
       {showContinue && onContinue ? (
-        <OrnamentalButton onClick={() => void handleContinue()} disabled={continueDisabled}>
+        <OrnamentalButton
+          onClick={() => void handleContinue()}
+          disabled={continueDisabled}
+          className="experience-nav__continue"
+        >
           {resolvedContinueLabel}
         </OrnamentalButton>
       ) : null}

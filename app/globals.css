@@ -128,8 +128,12 @@
   }
 
   .flow-btn {
-    @apply w-full px-6 py-3 text-sm font-semibold transition;
+    @apply min-h-[3rem] w-full px-5 py-3 text-sm font-semibold transition active:scale-[0.98];
     clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px);
+  }
+
+  .flow-btn--compact {
+    @apply min-h-[2.75rem] w-auto px-4 py-2 text-xs sm:text-sm;
   }
 
   .flow-btn--primary {
@@ -290,15 +294,15 @@
   }
 
   .flow-question-title {
-    @apply text-sm font-medium;
+    @apply text-base font-semibold leading-snug sm:text-lg;
   }
 
   .flow-options {
-    @apply grid grid-cols-2 gap-2;
+    @apply grid grid-cols-1 gap-2 sm:grid-cols-2;
   }
 
   .flow-option {
-    @apply rounded-xl border px-3 py-2 text-left text-xs sm:text-sm;
+    @apply min-h-[3rem] rounded-xl border px-4 py-3 text-left text-sm leading-snug transition active:scale-[0.98];
     border-color: color-mix(in srgb, var(--henna-accent) 25%, transparent);
     color: var(--henna-text);
   }
@@ -343,28 +347,19 @@
   }
 
   .flow-video-upload {
-    @apply pb-2;
+    @apply pb-1;
   }
 
   .flow-video-processing {
-    @apply min-h-[8rem] items-center justify-center py-6;
-  }
-
-  .flow-video-save-btn,
-  .flow-video-stop-btn {
-    @apply sticky bottom-0 z-10;
-  }
-
-  .experience-scene[data-step="video"] .experience-footer {
-    @apply sticky bottom-0 z-20;
-  }
-
-  .experience-scene[data-step="video"] .experience-glass {
-    @apply max-h-[100dvh];
+    @apply min-h-[6rem] items-center justify-center py-4;
   }
 
   .flow-video-preview {
-    @apply aspect-video max-h-[38dvh] min-h-[10rem] w-full rounded-xl bg-black object-contain;
+    @apply aspect-video max-h-[28dvh] min-h-[9rem] w-full rounded-xl bg-black object-contain sm:max-h-[32dvh];
+  }
+
+  .flow-video-preview--live {
+    @apply max-h-[32dvh] sm:max-h-[36dvh];
   }
 
   .flow-video-hint {
@@ -928,7 +923,7 @@
   }
 
   .ornamental-btn {
-    @apply relative inline-flex items-center justify-center gap-2 px-6 py-3 transition duration-300;
+    @apply relative inline-flex min-h-[3rem] items-center justify-center gap-2 px-5 py-3 transition duration-200 active:scale-[0.98];
     clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px);
   }
 
@@ -987,11 +982,11 @@
   }
 
   .experience-scene {
-    @apply flex h-[100dvh] items-center justify-center px-1;
+    @apply flex h-[100dvh] items-stretch justify-center px-0 sm:items-center sm:px-1;
   }
 
   .experience-glass {
-    @apply relative flex max-h-[92dvh] w-full flex-col gap-4 overflow-hidden px-3 py-5;
+    @apply relative flex h-[100dvh] max-h-[100dvh] w-full flex-col gap-3 overflow-hidden px-3 py-3 sm:max-h-[92dvh] sm:gap-4 sm:py-5;
     background: var(--henna-glass);
     border: 1px solid var(--henna-glass-border);
     box-shadow: var(--henna-shadow);
@@ -999,16 +994,40 @@
     clip-path: polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px);
   }
 
+  .experience-glass--compact {
+    @apply gap-2 py-2 sm:gap-3 sm:py-4;
+  }
+
   .experience-glass--framed {
     box-shadow: inset 0 0 0 1px rgba(212, 168, 83, 0.08), var(--henna-shadow);
   }
 
   .experience-toolbar {
-    @apply flex shrink-0 justify-center pb-2;
+    @apply flex shrink-0 justify-center pb-1;
   }
 
   .experience-header {
-    @apply space-y-3 text-center;
+    @apply shrink-0 space-y-3 text-center;
+  }
+
+  .experience-header--compact {
+    @apply space-y-1.5;
+  }
+
+  .experience-header--compact .experience-eyebrow {
+    @apply hidden sm:block;
+  }
+
+  .experience-header--compact .experience-subtitle {
+    @apply line-clamp-2 text-xs;
+  }
+
+  .experience-header--compact .ornament-divider {
+    @apply hidden sm:flex;
+  }
+
+  .experience-header--compact .experience-title {
+    @apply text-xl sm:text-2xl;
   }
 
   .experience-eyebrow {
@@ -1045,17 +1064,87 @@
   }
 
   .experience-body {
-    @apply min-h-0 flex-1 overflow-y-auto;
+    @apply min-h-0 flex-1 overflow-y-auto overscroll-contain;
+    -webkit-overflow-scrolling: touch;
   }
 
   .experience-footer {
-    @apply shrink-0 border-t pt-3;
+    @apply shrink-0 border-t px-1 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2;
     border-color: color-mix(in srgb, var(--henna-gold) 18%, transparent);
-    background: color-mix(in srgb, var(--henna-glass) 92%, transparent);
+    background: color-mix(in srgb, var(--henna-glass) 96%, transparent);
   }
 
   .experience-nav {
-    @apply flex flex-col gap-3;
+    @apply flex flex-row gap-2;
+  }
+
+  .experience-nav__back,
+  .experience-nav__continue {
+    @apply flex-1;
+  }
+
+  [dir="rtl"] .experience-nav {
+    @apply flex-row-reverse;
+  }
+
+  .questionnaire-mobile {
+    @apply flex min-h-0 flex-col gap-3;
+  }
+
+  .questionnaire-toolbar--compact {
+    @apply flex items-center justify-between gap-2;
+  }
+
+  .questionnaire-toolbar__progress {
+    @apply text-xs;
+    color: var(--henna-muted);
+  }
+
+  .questionnaire-dots {
+    @apply flex shrink-0 items-center justify-center gap-2;
+  }
+
+  .questionnaire-dots__dot {
+    @apply h-2.5 w-2.5 rounded-full transition;
+    background: color-mix(in srgb, var(--henna-muted) 35%, transparent);
+  }
+
+  .questionnaire-dots__dot--active {
+    @apply scale-125;
+    background: var(--henna-gold);
+  }
+
+  .questionnaire-dots__dot--done {
+    background: var(--henna-accent);
+  }
+
+  .questionnaire-card {
+    @apply flex min-h-0 flex-1 flex-col gap-3;
+  }
+
+  .questionnaire-card__title {
+    @apply mb-0 px-1 text-base leading-snug sm:text-lg;
+  }
+
+  .questionnaire-card__meta {
+    @apply px-1 text-xs;
+    color: var(--henna-muted);
+  }
+
+  .questionnaire-options {
+    @apply grid-cols-1;
+  }
+
+  .questionnaire-option {
+    @apply min-h-[3.25rem];
+  }
+
+  .questionnaire-step-nav {
+    @apply flex shrink-0 gap-2;
+  }
+
+  .ornamental-card--flush .ornamental-card__inner {
+    @apply p-2 sm:p-3;
   }
 
   .experience-copy {

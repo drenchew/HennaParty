@@ -1,12 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ExperienceNav } from "@/components/experience/ExperienceNav";
 import { useExperienceContext } from "@/components/experience/ExperienceProvider";
 import { SceneShell } from "@/components/experience/SceneShell";
 import { HijabPreferenceGate } from "@/components/media";
 import { OrnamentalCard } from "@/components/ornamental";
-import { VideoCapsuleUpload } from "@/components/video/VideoCapsuleUpload";
+import {
+  VideoCapsuleUpload,
+  type VideoCapsuleUploadHandle,
+  type VideoUploadMode,
+} from "@/components/video/VideoCapsuleUpload";
 import { useFlowContext } from "@/components/providers/FlowProvider";
 import { useLocale } from "@/components/providers/LocaleProvider";
 import { useGuestHijabi } from "@/hooks/useGuestHijabi";
@@ -21,9 +25,11 @@ export function VideoScene() {
   const { nextStep, prevStep, setTransitionLocked } = useExperienceContext();
   const { t } = useLocale();
   const { hijabi: guestHijabi } = useGuestHijabi();
+  const uploadRef = useRef<VideoCapsuleUploadHandle>(null);
   const [uploaded, setUploaded] = useState<SafeVideo | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [pendingDuration, setPendingDuration] = useState(0);
+  const [uploadMode, setUploadMode] = useState<VideoUploadMode>("choose");
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,9 +54,9 @@ export function VideoScene() {
   }, [loadStatus]);
 
   useEffect(() => {
-    setTransitionLocked(uploading);
+    setTransitionLocked(uploading || uploadMode === "recording");
     return () => setTransitionLocked(false);
-  }, [uploading, setTransitionLocked]);
+  }, [uploading, uploadMode, setTransitionLocked]);
 
   function handleVideoReady(file: File, durationSeconds: number) {
     setPendingFile(file);
@@ -96,10 +102,33 @@ export function VideoScene() {
     return true;
   }
 
+  function handleFooterPrimary() {
+    if (uploadMode === "recording") {
+      uploadRef.current?.stopRecording();
+      return;
+    }
+    void handleContinue();
+  }
+
   const videoSubtitle =
     guestHijabi === true ? t("video.subtitleHijabi") : t("video.subtitleStandard");
 
   const canUpload = guestHijabi !== null;
+
+  const footerContinueLabel =
+    uploading
+      ? t("video.uploading")
+      : uploaded
+        ? t("common.continue")
+        : uploadMode === "recording"
+          ? t("videoUpload.stop")
+          : t("video.saveContinue");
+
+  const footerContinueDisabled =
+    uploading ||
+    (uploadMode === "choose" && !uploaded) ||
+    (uploadMode === "processing" && !uploaded) ||
+    (uploadMode === "preview" && !pendingFile && !uploaded);
 
   return (
     <SceneShell
@@ -110,15 +139,9 @@ export function VideoScene() {
         !loading && canUpload ? (
           <ExperienceNav
             onBack={prevStep}
-            continueLabel={
-              uploading
-                ? t("video.uploading")
-                : uploaded
-                  ? t("common.continue")
-                  : t("video.saveContinue")
-            }
-            onContinue={handleContinue}
-            continueDisabled={uploading || (!uploaded && !pendingFile)}
+            continueLabel={footerContinueLabel}
+            onContinue={handleFooterPrimary}
+            continueDisabled={footerContinueDisabled}
             showContinue={!uploaded}
           />
         ) : !loading ? (
@@ -142,15 +165,13 @@ export function VideoScene() {
               </div>
             </OrnamentalCard>
           ) : (
-            <OrnamentalCard>
+            <OrnamentalCard className="ornamental-card--flush">
               <VideoCapsuleUpload
+                ref={uploadRef}
                 onVideoReady={handleVideoReady}
                 onClear={handleClear}
-                onConfirm={() => void handleContinue()}
-                confirmLabel={
-                  uploading ? t("video.uploading") : t("video.saveContinue")
-                }
-                confirming={uploading}
+                onModeChange={setUploadMode}
+                controlsInFooter
                 disabled={uploading}
               />
             </OrnamentalCard>

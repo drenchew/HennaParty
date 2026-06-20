@@ -47,13 +47,24 @@ export function SceneShell({
       aria-label={t(`steps.${stepKey}`)}
     >
       <div
-        className={`experience-glass ${framed ? "experience-glass--framed" : ""} ${welcomeHero ? "experience-glass--welcome" : ""}`}
+        className={[
+          "experience-glass",
+          framed ? "experience-glass--framed" : "",
+          welcomeHero ? "experience-glass--welcome" : "experience-glass--compact",
+        ]
+          .filter(Boolean)
+          .join(" ")}
       >
         <div className="experience-toolbar">
           <LanguageToggle />
         </div>
         <header
-          className={`experience-header ${welcomeHero ? "experience-header--welcome" : ""}`}
+          className={[
+            "experience-header",
+            welcomeHero ? "experience-header--welcome" : "experience-header--compact",
+          ]
+            .filter(Boolean)
+            .join(" ")}
         >
           {!welcomeHero ? (
             <p className="experience-eyebrow">{t("common.hennaNight")}</p>
@@ -77,7 +88,7 @@ export function SceneShell({
           {!welcomeHero ? <OrnamentDivider /> : null}
         </header>
 
-        <div className="experience-body" data-ready={isReady}>
+        <div className="experience-body" data-ready={isReady} data-scroll-container>
           {!isReady ? (
             <p className="experience-loading">{t("common.loading")}</p>
           ) : (
