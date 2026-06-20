@@ -358,8 +358,33 @@
     @apply aspect-video max-h-[28dvh] min-h-[9rem] w-full rounded-xl bg-black object-contain sm:max-h-[32dvh];
   }
 
+  .flow-video-upload--recording {
+    @apply gap-2;
+  }
+
+  .flow-video-recorder--live {
+    @apply gap-2;
+  }
+
   .flow-video-preview--live {
-    @apply max-h-[32dvh] sm:max-h-[36dvh];
+    @apply max-h-[24dvh] min-h-[8rem] sm:max-h-[30dvh];
+    transform: scaleX(-1);
+  }
+
+  .flow-video-stop-btn {
+    @apply shrink-0;
+  }
+
+  .experience-scene[data-recording="true"] .experience-header--compact {
+    @apply hidden sm:block;
+  }
+
+  .experience-scene[data-recording="true"] .experience-body {
+    @apply overflow-hidden;
+  }
+
+  .experience-scene[data-recording="true"] .experience-footer {
+    @apply pt-2;
   }
 
   .flow-video-hint {

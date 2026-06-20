@@ -91,10 +91,6 @@ export const VideoCapsuleUpload = forwardRef<
   }, [previewUrl]);
 
   useEffect(() => {
-    onModeChange?.("choose");
-  }, [onModeChange]);
-
-  useEffect(() => {
     return () => {
       clearTimer();
       stopStream();
@@ -279,10 +275,9 @@ export const VideoCapsuleUpload = forwardRef<
   }
 
   const remaining = MAX_VIDEO_DURATION_SECONDS - elapsed;
-  const showInlinePrimary = !controlsInFooter;
 
   return (
-    <div className="flow-stack flow-video-upload">
+    <div className={`flow-stack flow-video-upload${mode === "recording" ? " flow-video-upload--recording" : ""}`}>
       {mode === "choose" && (
         <>
           <button
@@ -306,7 +301,7 @@ export const VideoCapsuleUpload = forwardRef<
       )}
 
       {mode === "recording" && (
-        <div className="flow-video-recorder">
+        <div className="flow-video-recorder flow-video-recorder--live">
           <video
             ref={videoRef}
             className="flow-video-preview flow-video-preview--live"
@@ -322,10 +317,10 @@ export const VideoCapsuleUpload = forwardRef<
               ? t("videoUpload.recordingFooterHint")
               : t("videoUpload.recordingHint")}
           </p>
-          {showInlinePrimary ? (
+          {!controlsInFooter ? (
             <button
               type="button"
-              className="flow-btn flow-btn--primary"
+              className="flow-btn flow-btn--primary flow-video-stop-btn"
               onClick={handleStopRecording}
             >
               {t("videoUpload.stop")}

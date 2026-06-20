@@ -126,24 +126,37 @@ export function VideoScene() {
 
   const footerContinueDisabled =
     uploading ||
-    (uploadMode === "choose" && !uploaded) ||
-    (uploadMode === "processing" && !uploaded) ||
-    (uploadMode === "preview" && !pendingFile && !uploaded);
+    uploadMode === "choose" ||
+    uploadMode === "processing" ||
+    (uploadMode === "preview" && !pendingFile);
+
+  const recordingFooter = uploadMode === "recording";
 
   return (
     <SceneShell
       step="video"
+      recordingLayout={recordingFooter}
       title={t("video.title")}
       subtitle={canUpload ? videoSubtitle : t("media.hijabIntro")}
       footer={
         !loading && canUpload ? (
-          <ExperienceNav
-            onBack={prevStep}
-            continueLabel={footerContinueLabel}
-            onContinue={handleFooterPrimary}
-            continueDisabled={footerContinueDisabled}
-            showContinue={!uploaded}
-          />
+          recordingFooter ? (
+            <button
+              type="button"
+              className="flow-btn flow-btn--primary flow-video-stop-btn"
+              onClick={() => uploadRef.current?.stopRecording()}
+            >
+              {t("videoUpload.stop")}
+            </button>
+          ) : (
+            <ExperienceNav
+              onBack={prevStep}
+              continueLabel={footerContinueLabel}
+              onContinue={handleFooterPrimary}
+              continueDisabled={footerContinueDisabled}
+              showContinue={!uploaded}
+            />
+          )
         ) : !loading ? (
           <ExperienceNav onBack={prevStep} showContinue={false} />
         ) : null

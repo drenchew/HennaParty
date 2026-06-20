@@ -16,6 +16,8 @@ interface SceneShellProps {
   children: ReactNode;
   footer?: ReactNode;
   framed?: boolean;
+  /** Tighter layout while the guest is recording video (keeps stop button on screen). */
+  recordingLayout?: boolean;
   /** Welcome scene uses a custom hero layout without the default eyebrow. */
   welcomeHero?: boolean;
   /** Optional ornament shown between title and subtitle on the welcome hero. */
@@ -30,6 +32,7 @@ export function SceneShell({
   children,
   footer,
   framed = false,
+  recordingLayout = false,
   welcomeHero = false,
   heroDate,
 }: SceneShellProps) {
@@ -44,6 +47,7 @@ export function SceneShell({
     <section
       className="experience-scene"
       data-step={step}
+      data-recording={recordingLayout ? "true" : undefined}
       aria-label={t(`steps.${stepKey}`)}
     >
       <div
