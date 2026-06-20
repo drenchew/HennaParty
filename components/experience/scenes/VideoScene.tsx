@@ -24,7 +24,7 @@ export function VideoScene() {
   const { refresh } = useFlowContext();
   const { nextStep, prevStep, setTransitionLocked } = useExperienceContext();
   const { t } = useLocale();
-  const { hijabi: guestHijabi } = useGuestHijabi();
+  const { hijabi: guestHijabi, refresh: refreshGuestHijabi } = useGuestHijabi();
   const stopRecordingRef = useRef<(() => void) | null>(null);
   const [uploaded, setUploaded] = useState<SafeVideo | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
@@ -129,41 +129,39 @@ export function VideoScene() {
       title={t("video.title")}
       subtitle={canUpload ? videoSubtitle : t("media.hijabIntro")}
       footer={
-        !loading && canUpload ? (
-          recordingActive ? (
-            <div className="experience-nav">
-              <OrnamentalButton
-                variant="secondary"
-                onClick={prevStep}
-                className="experience-nav__back"
-              >
-                {t("common.back")}
-              </OrnamentalButton>
-              <OrnamentalButton
-                onClick={() => stopRecordingRef.current?.()}
-                className="experience-nav__continue flow-video-stop-btn"
-              >
-                {t("videoUpload.stop")}
-              </OrnamentalButton>
-            </div>
-          ) : (
-            <ExperienceNav
-              onBack={prevStep}
-              continueLabel={footerContinueLabel}
-              onContinue={() => void handleContinue()}
-              continueDisabled={footerContinueDisabled}
-              showContinue={!uploaded}
-            />
-          )
-        ) : !loading ? (
+        loading ? null : recordingActive ? (
+          <div className="experience-nav experience-nav--recording">
+            <OrnamentalButton
+              variant="secondary"
+              onClick={prevStep}
+              className="experience-nav__back"
+            >
+              {t("common.back")}
+            </OrnamentalButton>
+            <OrnamentalButton
+              onClick={() => stopRecordingRef.current?.()}
+              className="experience-nav__continue flow-video-stop-btn"
+            >
+              {t("videoUpload.stop")}
+            </OrnamentalButton>
+          </div>
+        ) : canUpload ? (
+          <ExperienceNav
+            onBack={prevStep}
+            continueLabel={footerContinueLabel}
+            onContinue={() => void handleContinue()}
+            continueDisabled={footerContinueDisabled}
+            showContinue={!uploaded}
+          />
+        ) : (
           <ExperienceNav onBack={prevStep} showContinue={false} />
-        ) : null
+        )
       }
     >
       {loading && <p className="experience-loading">{t("video.loading")}</p>}
 
       {!loading && (
-        <HijabPreferenceGate>
+        <HijabPreferenceGate onPreferenceSaved={refreshGuestHijabi}>
           {uploaded ? (
             <OrnamentalCard>
               <div className="experience-stack">

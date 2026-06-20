@@ -11,10 +11,15 @@ import { setGuestHijabiPreference } from "@/services/guest.service";
 
 interface HijabPreferenceGateProps {
   children: ReactNode;
+  /** Sync parent scene state after the guest picks a section. */
+  onPreferenceSaved?: () => void;
 }
 
 /** Ask hijabi vs standard section once, before photo/video uploads. */
-export function HijabPreferenceGate({ children }: HijabPreferenceGateProps) {
+export function HijabPreferenceGate({
+  children,
+  onPreferenceSaved,
+}: HijabPreferenceGateProps) {
   const { t } = useLocale();
   const { hijabi, isLoading, refresh } = useGuestHijabi();
   const [saving, setSaving] = useState(false);
@@ -33,6 +38,7 @@ export function HijabPreferenceGate({ children }: HijabPreferenceGateProps) {
     }
 
     refresh();
+    onPreferenceSaved?.();
     setSaving(false);
   }
 

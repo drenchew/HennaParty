@@ -16,7 +16,7 @@ export function PhotosScene() {
   const { refresh } = useFlowContext();
   const { nextStep, prevStep } = useExperienceContext();
   const { t } = useLocale();
-  const { hijabi: guestHijabi } = useGuestHijabi();
+  const { hijabi: guestHijabi, refresh: refreshGuestHijabi } = useGuestHijabi();
 
   const canUpload = guestHijabi !== null;
 
@@ -49,7 +49,7 @@ export function PhotosScene() {
         )
       }
     >
-      <HijabPreferenceGate>
+      <HijabPreferenceGate onPreferenceSaved={refreshGuestHijabi}>
         <OrnamentalCard>
           <PhotoUpload />
         </OrnamentalCard>

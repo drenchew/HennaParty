@@ -400,7 +400,11 @@
   }
 
   .experience-scene[data-recording="true"] .experience-footer {
-    @apply pt-2;
+    @apply relative z-10 shrink-0 pt-2;
+  }
+
+  .experience-nav--recording {
+    @apply w-full;
   }
 
   .flow-video-hint {
