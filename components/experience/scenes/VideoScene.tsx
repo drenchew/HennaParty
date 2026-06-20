@@ -119,7 +119,7 @@ export function VideoScene() {
             }
             onContinue={handleContinue}
             continueDisabled={uploading || (!uploaded && !pendingFile)}
-            showContinue={Boolean(uploaded || pendingFile || uploading)}
+            showContinue={!uploaded}
           />
         ) : !loading ? (
           <ExperienceNav onBack={prevStep} showContinue={false} />

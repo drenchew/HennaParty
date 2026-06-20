@@ -2,24 +2,42 @@ import { MAX_VIDEO_DURATION_SECONDS } from "@/lib/constants/steps";
 import { normalizeVideoMime } from "@/lib/video/validation";
 
 /** Measure duration of a local video file via browser metadata. */
-export function getVideoFileDuration(file: File): Promise<number> {
+export function getVideoFileDuration(
+  file: File,
+  timeoutMs = 4000,
+): Promise<number> {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file);
     const video = document.createElement("video");
     video.preload = "metadata";
+    video.playsInline = true;
+
+    let settled = false;
+
+    const finish = (fn: () => void) => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timer);
+      URL.revokeObjectURL(url);
+      fn();
+    };
+
+    const timer = window.setTimeout(() => {
+      finish(() => reject(new Error("Could not read video duration")));
+    }, timeoutMs);
 
     video.onloadedmetadata = () => {
-      URL.revokeObjectURL(url);
-      if (!Number.isFinite(video.duration)) {
-        reject(new Error("Could not read video duration"));
-        return;
-      }
-      resolve(video.duration);
+      finish(() => {
+        if (!Number.isFinite(video.duration) || video.duration <= 0) {
+          reject(new Error("Could not read video duration"));
+          return;
+        }
+        resolve(video.duration);
+      });
     };
 
     video.onerror = () => {
-      URL.revokeObjectURL(url);
-      reject(new Error("Could not load video file"));
+      finish(() => reject(new Error("Could not load video file")));
     };
 
     video.src = url;

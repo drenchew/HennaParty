@@ -342,6 +342,27 @@
     @apply flex flex-col gap-3;
   }
 
+  .flow-video-upload {
+    @apply pb-2;
+  }
+
+  .flow-video-processing {
+    @apply min-h-[8rem] items-center justify-center py-6;
+  }
+
+  .flow-video-save-btn,
+  .flow-video-stop-btn {
+    @apply sticky bottom-0 z-10;
+  }
+
+  .experience-scene[data-step="video"] .experience-footer {
+    @apply sticky bottom-0 z-20;
+  }
+
+  .experience-scene[data-step="video"] .experience-glass {
+    @apply max-h-[100dvh];
+  }
+
   .flow-video-preview {
     @apply aspect-video max-h-[38dvh] min-h-[10rem] w-full rounded-xl bg-black object-contain;
   }

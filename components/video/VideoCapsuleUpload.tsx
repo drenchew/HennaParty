@@ -20,7 +20,7 @@ export interface VideoCapsuleUploadProps {
   disabled?: boolean;
 }
 
-type Mode = "choose" | "recording" | "preview";
+type Mode = "choose" | "recording" | "processing" | "preview";
 
 export function VideoCapsuleUpload({
   onVideoReady,
@@ -44,6 +44,7 @@ export function VideoCapsuleUpload({
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const elapsedRef = useRef(0);
+  const previewUrlRef = useRef<string | null>(null);
 
   const stopStream = useCallback(() => {
     streamRef.current?.getTracks().forEach((track) => track.stop());
@@ -57,18 +58,21 @@ export function VideoCapsuleUpload({
     }
   }, []);
 
-  const revokePreview = useCallback(() => {
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-    setPreviewUrl(null);
+  const revokePreviewUrl = useCallback((url: string | null) => {
+    if (url) URL.revokeObjectURL(url);
+  }, []);
+
+  useEffect(() => {
+    previewUrlRef.current = previewUrl;
   }, [previewUrl]);
 
   useEffect(() => {
     return () => {
       clearTimer();
       stopStream();
-      revokePreview();
+      revokePreviewUrl(previewUrlRef.current);
     };
-  }, [clearTimer, stopStream, revokePreview]);
+  }, [clearTimer, stopStream, revokePreviewUrl]);
 
   /** Attach camera stream after the <video> element mounts (mode === recording). */
   useEffect(() => {
@@ -106,17 +110,35 @@ export function VideoCapsuleUpload({
     const validationError = translateDurationError(validateDuration(durationSeconds));
     if (validationError) {
       setError(validationError);
+      setMode("choose");
       return;
     }
 
+    revokePreviewUrl(previewUrlRef.current);
+    const url = URL.createObjectURL(file);
+
     setDuration(durationSeconds);
     setFileName(file.name);
-    revokePreview();
-    const url = URL.createObjectURL(file);
     setPreviewUrl(url);
     setMode("preview");
     setError(null);
     onVideoReady(file, durationSeconds);
+  }
+
+  function finalizeRecording() {
+    const recorder = recorderRef.current;
+    const recordedMime = recorder?.mimeType || pickRecorderMimeType() || "video/webm";
+    const blob = new Blob(chunksRef.current, { type: recordedMime });
+
+    if (blob.size === 0) {
+      setError(t("videoUpload.recordTooShort"));
+      setMode("choose");
+      return;
+    }
+
+    const file = fileFromRecordedBlob(blob, recordedMime);
+    const recordedDuration = Math.max(1, elapsedRef.current);
+    setReadyFile(file, recordedDuration);
   }
 
   async function handleStartRecording() {
@@ -153,33 +175,24 @@ export function VideoCapsuleUpload({
       recorder.onstop = () => {
         clearTimer();
         stopStream();
-
-        const recordedMime = recorder.mimeType || mimeType || "video/webm";
-        const blob = new Blob(chunksRef.current, { type: recordedMime });
-        const file = fileFromRecordedBlob(blob, recordedMime);
-        const recordedDuration = Math.max(1, elapsedRef.current);
-
-        void getVideoFileDuration(file)
-          .then((metadataDuration) => {
-            const duration =
-              Number.isFinite(metadataDuration) &&
-              metadataDuration > 0 &&
-              metadataDuration <= MAX_VIDEO_DURATION_SECONDS
-                ? metadataDuration
-                : recordedDuration;
-            setReadyFile(file, duration);
-          })
-          .catch(() => setReadyFile(file, recordedDuration));
+        window.setTimeout(() => finalizeRecording(), 150);
       };
 
-      recorder.start(500);
+      recorder.onerror = () => {
+        clearTimer();
+        stopStream();
+        setError(t("videoUpload.cameraError"));
+        setMode("choose");
+      };
+
+      recorder.start(250);
 
       timerRef.current = setInterval(() => {
         elapsedRef.current += 1;
         setElapsed(elapsedRef.current);
 
         if (elapsedRef.current >= MAX_VIDEO_DURATION_SECONDS) {
-          recorderRef.current?.stop();
+          handleStopRecording();
         }
       }, 1000);
     } catch {
@@ -190,9 +203,19 @@ export function VideoCapsuleUpload({
   }
 
   function handleStopRecording() {
-    if (recorderRef.current?.state === "recording") {
-      recorderRef.current.stop();
+    const recorder = recorderRef.current;
+    if (!recorder || recorder.state !== "recording") return;
+
+    setMode("processing");
+    setError(null);
+
+    try {
+      recorder.requestData();
+    } catch {
+      // Some browsers omit requestData — stop still works with timeslice blobs.
     }
+
+    recorder.stop();
   }
 
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -201,16 +224,20 @@ export function VideoCapsuleUpload({
     if (!file || disabled) return;
 
     setError(null);
+    setMode("processing");
+
     try {
-      const d = await getVideoFileDuration(file);
-      setReadyFile(file, d);
+      const metadataDuration = await getVideoFileDuration(file);
+      setReadyFile(file, metadataDuration);
     } catch {
       setError(t("videoUpload.readError"));
+      setMode("choose");
     }
   }
 
   function handleRetake() {
-    revokePreview();
+    revokePreviewUrl(previewUrlRef.current);
+    setPreviewUrl(null);
     setMode("choose");
     setDuration(0);
     setElapsed(0);
@@ -221,9 +248,10 @@ export function VideoCapsuleUpload({
   }
 
   const remaining = MAX_VIDEO_DURATION_SECONDS - elapsed;
+  const showSaveButton = mode === "preview" && Boolean(onConfirm && confirmLabel);
 
   return (
-    <div className="flow-stack">
+    <div className="flow-stack flow-video-upload">
       {mode === "choose" && (
         <>
           <button
@@ -261,11 +289,17 @@ export function VideoCapsuleUpload({
           <p className="flow-video-hint">{t("videoUpload.recordingHint")}</p>
           <button
             type="button"
-            className="flow-btn flow-btn--primary"
+            className="flow-btn flow-btn--primary flow-video-stop-btn"
             onClick={handleStopRecording}
           >
             {t("videoUpload.stop")}
           </button>
+        </div>
+      )}
+
+      {mode === "processing" && (
+        <div className="flow-video-recorder flow-video-processing">
+          <p className="flow-loading">{t("videoUpload.processing")}</p>
         </div>
       )}
 
@@ -275,12 +309,12 @@ export function VideoCapsuleUpload({
           <p className="flow-success">
             {t("videoUpload.ready")}: <strong>{fileName}</strong> ({formatDuration(duration)})
           </p>
-          {onConfirm && confirmLabel ? (
+          {showSaveButton ? (
             <button
               type="button"
-              className="flow-btn flow-btn--primary"
+              className="flow-btn flow-btn--primary flow-video-save-btn"
               disabled={disabled || confirming}
-              onClick={() => void onConfirm()}
+              onClick={() => void onConfirm?.()}
             >
               {confirmLabel}
             </button>
