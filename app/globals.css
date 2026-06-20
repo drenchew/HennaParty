@@ -359,11 +359,11 @@
   }
 
   .flow-video-upload--recording {
-    @apply gap-2;
+    @apply min-h-0 gap-2;
   }
 
   .flow-video-recorder--live {
-    @apply gap-2;
+    @apply min-h-0 gap-2;
   }
 
   .flow-video-preview--live {
@@ -372,7 +372,11 @@
   }
 
   .flow-video-stop-btn {
-    @apply min-h-[3rem] w-full shrink-0 text-base;
+    @apply min-h-[3rem] shrink-0 text-base;
+  }
+
+  .flow-video-recorder--live .flow-video-stop-btn {
+    @apply w-full;
   }
 
   .experience-scene[data-recording="true"] .experience-header--compact {
@@ -380,7 +384,19 @@
   }
 
   .experience-scene[data-recording="true"] .experience-body {
-    @apply overflow-hidden;
+    @apply flex min-h-0 flex-col overflow-hidden;
+  }
+
+  .experience-scene[data-recording="true"] .flow-video-upload--recording {
+    @apply flex min-h-0 flex-1 flex-col;
+  }
+
+  .experience-scene[data-recording="true"] .flow-video-recorder--live {
+    @apply flex min-h-0 flex-1 flex-col;
+  }
+
+  .experience-scene[data-recording="true"] .flow-video-preview--live {
+    @apply min-h-0 flex-1 max-h-none aspect-auto object-cover;
   }
 
   .experience-scene[data-recording="true"] .experience-footer {

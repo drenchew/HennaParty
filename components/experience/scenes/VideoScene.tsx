@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ExperienceNav } from "@/components/experience/ExperienceNav";
+import { OrnamentalButton } from "@/components/ornamental";
 import { useExperienceContext } from "@/components/experience/ExperienceProvider";
 import { SceneShell } from "@/components/experience/SceneShell";
 import { HijabPreferenceGate } from "@/components/media";
@@ -24,6 +25,7 @@ export function VideoScene() {
   const { nextStep, prevStep, setTransitionLocked } = useExperienceContext();
   const { t } = useLocale();
   const { hijabi: guestHijabi } = useGuestHijabi();
+  const stopRecordingRef = useRef<(() => void) | null>(null);
   const [uploaded, setUploaded] = useState<SafeVideo | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [pendingDuration, setPendingDuration] = useState(0);
@@ -118,21 +120,41 @@ export function VideoScene() {
     uploadMode === "processing" ||
     (uploadMode === "preview" && !pendingFile);
 
+  const recordingActive = uploadMode === "recording";
+
   return (
     <SceneShell
       step="video"
-      recordingLayout={uploadMode === "recording"}
+      recordingLayout={recordingActive}
       title={t("video.title")}
       subtitle={canUpload ? videoSubtitle : t("media.hijabIntro")}
       footer={
         !loading && canUpload ? (
-          <ExperienceNav
-            onBack={prevStep}
-            continueLabel={footerContinueLabel}
-            onContinue={() => void handleContinue()}
-            continueDisabled={footerContinueDisabled}
-            showContinue={!uploaded && uploadMode !== "recording"}
-          />
+          recordingActive ? (
+            <div className="experience-nav">
+              <OrnamentalButton
+                variant="secondary"
+                onClick={prevStep}
+                className="experience-nav__back"
+              >
+                {t("common.back")}
+              </OrnamentalButton>
+              <OrnamentalButton
+                onClick={() => stopRecordingRef.current?.()}
+                className="experience-nav__continue flow-video-stop-btn"
+              >
+                {t("videoUpload.stop")}
+              </OrnamentalButton>
+            </div>
+          ) : (
+            <ExperienceNav
+              onBack={prevStep}
+              continueLabel={footerContinueLabel}
+              onContinue={() => void handleContinue()}
+              continueDisabled={footerContinueDisabled}
+              showContinue={!uploaded}
+            />
+          )
         ) : !loading ? (
           <ExperienceNav onBack={prevStep} showContinue={false} />
         ) : null
@@ -159,6 +181,10 @@ export function VideoScene() {
                 onVideoReady={handleVideoReady}
                 onClear={handleClear}
                 onModeChange={setUploadMode}
+                stopInFooter
+                onStopActionChange={(stop) => {
+                  stopRecordingRef.current = stop;
+                }}
                 disabled={uploading}
               />
             </OrnamentalCard>

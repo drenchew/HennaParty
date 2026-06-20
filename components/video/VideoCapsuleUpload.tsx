@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useLocale } from "@/components/providers/LocaleProvider";
 import { MAX_VIDEO_DURATION_SECONDS } from "@/lib/constants/steps";
 import { createVideoRecorder } from "@/lib/video/recordrtc-client";
@@ -18,6 +18,9 @@ export interface VideoCapsuleUploadProps {
   onVideoReady: (file: File, durationSeconds: number) => void;
   onClear?: () => void;
   onModeChange?: (mode: VideoUploadMode) => void;
+  /** Parent renders Stop in a fixed footer — keeps it visible on small screens. */
+  stopInFooter?: boolean;
+  onStopActionChange?: (stop: (() => void) | null) => void;
   disabled?: boolean;
 }
 
@@ -25,6 +28,8 @@ export function VideoCapsuleUpload({
   onVideoReady,
   onClear,
   onModeChange,
+  stopInFooter = false,
+  onStopActionChange,
   disabled,
 }: VideoCapsuleUploadProps) {
   const { t } = useLocale();
@@ -172,6 +177,20 @@ export function VideoCapsuleUpload({
     });
   }, [clearTimer, destroyRecorder, setUploadMode, stopStream, t]);
 
+  useLayoutEffect(() => {
+    if (!stopInFooter) {
+      onStopActionChange?.(null);
+      return;
+    }
+
+    if (mode === "recording") {
+      onStopActionChange?.(handleStopRecording);
+      return () => onStopActionChange?.(null);
+    }
+
+    onStopActionChange?.(null);
+  }, [mode, stopInFooter, handleStopRecording, onStopActionChange]);
+
   async function handleStartRecording() {
     if (disabled) return;
     setError(null);
@@ -279,15 +298,19 @@ export function VideoCapsuleUpload({
           <div className="flow-video-timer" data-warning={remaining <= 10}>
             {formatDuration(elapsed)} / {formatDuration(MAX_VIDEO_DURATION_SECONDS)}
           </div>
-          <p className="flow-video-hint">{t("videoUpload.recordingHint")}</p>
-          <button
-            type="button"
-            className="flow-btn flow-btn--primary flow-video-stop-btn"
-            onPointerDown={(event) => event.preventDefault()}
-            onClick={handleStopRecording}
-          >
-            {t("videoUpload.stop")}
-          </button>
+          <p className="flow-video-hint">
+            {stopInFooter ? t("videoUpload.recordingFooterHint") : t("videoUpload.recordingHint")}
+          </p>
+          {!stopInFooter ? (
+            <button
+              type="button"
+              className="flow-btn flow-btn--primary flow-video-stop-btn"
+              onPointerDown={(event) => event.preventDefault()}
+              onClick={handleStopRecording}
+            >
+              {t("videoUpload.stop")}
+            </button>
+          ) : null}
         </div>
       )}
 
