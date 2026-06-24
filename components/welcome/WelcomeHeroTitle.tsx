@@ -4,7 +4,7 @@ import { useLocale } from "@/components/providers/LocaleProvider";
 
 const SPARK_COUNT = 14;
 
-/** Welcome headline with Ayda / عائدة in a fiery sparkle glow. */
+/** Welcome headline with Ayda / عايدة in a fiery sparkle glow. */
 export function WelcomeHeroTitle() {
   const { locale, t } = useLocale();
   const name = (

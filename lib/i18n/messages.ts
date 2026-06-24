@@ -26,17 +26,17 @@ export const messages: Record<Locale, MessageTree> = {
       complete: "شكراً لك",
     },
     welcome: {
-      heroTitle: "ليلة حناء عائدة",
-      heroName: "عائدة",
+      heroTitle: "ليلة حناء عايدة",
+      heroName: "عايدة",
       heroTitlePrefix: "ليلة حناء",
       heroTitleSuffix: "",
-      title: "ليلة حناء عائدة",
+      title: "ليلة حناء عايدة",
       partyDateDay: "٢٤",
       partyDateMonth: "يونيو",
       partyDateFull: "٢٤ يونيو",
       subtitle:
         "شكراً لكونكم جزءاً من هذه الاحتفالية. لكل ضيف تجربة فريدة — لنبدأ رحلتكم.",
-      photoAlt: "صورة العروسين — ليلة حناء عائدة",
+      photoAlt: "صورة العروسين — ليلة حناء عايدة",
       photoPlaceholder: "ضعوا صورتكم في public/images/couple.png",
       sessionReady:
         "جلسة ضيف مجهولة جاهزة. لا حاجة لتسجيل الدخول — أنشأنا لكم معرّفاً خاصاً.",
