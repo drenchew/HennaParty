@@ -55,26 +55,8 @@ export function AdminDuasTab() {
     await load();
   }
 
-  async function handleRelease(id: number) {
-    if (!confirm("Release this dua back to the pool? The guest will no longer have it assigned.")) {
-      return;
-    }
-
-    setError(null);
-    const result = await adminFetch<{ released: true }>(`/api/admin/duas/${id}`, {
-      method: "PATCH",
-    });
-
-    if (isApiError(result)) {
-      setError(result.error);
-      return;
-    }
-
-    await load();
-  }
-
   async function handleDelete(id: number) {
-    if (!confirm("Delete this dua? Assigned duas will be unassigned first.")) return;
+    if (!confirm("Remove this dua from the pool?")) return;
 
     setError(null);
     const result = await adminFetch<{ deleted: true }>(`/api/admin/duas/${id}`, {
@@ -131,23 +113,11 @@ export function AdminDuasTab() {
             </p>
             <p className="admin-dua-translation">{dua.translation}</p>
             <div className="admin-dua-meta">
-              <span className="admin-badge" data-used={dua.used}>
-                {dua.used ? "Assigned" : "Available"}
+              <span className="admin-badge" data-used="false">
+                In pool
               </span>
-              {dua.accepted_at && (
-                <span className="flow-meta">Accepted by guest</span>
-              )}
             </div>
             <div className="admin-dua-actions">
-              {dua.used && (
-                <button
-                  type="button"
-                  className="flow-btn flow-btn--secondary"
-                  onClick={() => void handleRelease(dua.id)}
-                >
-                  Release
-                </button>
-              )}
               <button
                 type="button"
                 className="flow-btn flow-btn--secondary admin-btn-danger"

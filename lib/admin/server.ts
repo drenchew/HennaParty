@@ -1,4 +1,5 @@
 import { mapDuaRow } from "@/lib/dua/map";
+import { DUA_SELECT, isPoolDuaRow } from "@/lib/dua/pool";
 import { photosBucketForHijabi, videosBucketForHijabi } from "@/lib/media/buckets";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getLiveResults } from "@/lib/vote/server";
@@ -67,7 +68,7 @@ export async function getAdminOverview(): Promise<AdminOverview> {
   const [statsResult, guestsResult, duasResult] = await Promise.all([
     supabase.rpc("get_event_stats"),
     supabase.from("guests").select("id", { count: "exact", head: true }),
-    supabase.from("duas").select("id, used"),
+    supabase.from("duas").select("id, used, assigned_guest_id"),
   ]);
 
   if (statsResult.error) throw statsResult.error;
@@ -76,6 +77,7 @@ export async function getAdminOverview(): Promise<AdminOverview> {
 
   const row = Array.isArray(statsResult.data) ? statsResult.data[0] : statsResult.data;
   const duas = duasResult.data ?? [];
+  const poolDuas = duas.filter((d) => isPoolDuaRow(d));
 
   return {
     stats: {
@@ -86,8 +88,8 @@ export async function getAdminOverview(): Promise<AdminOverview> {
       videos_count: Number(row?.videos_count ?? 0),
     },
     guest_count: guestsResult.count ?? 0,
-    duas_total: duas.length,
-    duas_available: duas.filter((d) => !d.used).length,
+    duas_total: poolDuas.length,
+    duas_available: poolDuas.length,
   };
 }
 
@@ -169,9 +171,9 @@ export async function listDuasForAdmin(): Promise<Dua[]> {
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("duas")
-    .select(
-      "id, arabic, translation, used, assigned_guest_id, assigned_at, accepted_at",
-    )
+    .select(DUA_SELECT)
+    .eq("used", false)
+    .is("assigned_guest_id", null)
     .order("id", { ascending: true });
 
   if (error) throw error;
@@ -193,9 +195,7 @@ export async function createDuaForAdmin(input: {
   const { data, error } = await supabase
     .from("duas")
     .insert({ arabic, translation })
-    .select(
-      "id, arabic, translation, used, assigned_guest_id, assigned_at, accepted_at",
-    )
+    .select(DUA_SELECT)
     .single();
 
   if (error) throw error;
@@ -206,25 +206,14 @@ export async function deleteDuaForAdmin(id: number): Promise<void> {
   const supabase = createAdminClient();
   const { data: dua, error: fetchError } = await supabase
     .from("duas")
-    .select("id, used")
+    .select("id, used, assigned_guest_id")
     .eq("id", id)
     .maybeSingle();
 
   if (fetchError) throw fetchError;
   if (!dua) throw new Error("NOT_FOUND:Dua not found");
-
-  if (dua.used) {
-    const { error: unassignError } = await supabase
-      .from("duas")
-      .update({
-        used: false,
-        assigned_guest_id: null,
-        assigned_at: null,
-        accepted_at: null,
-      })
-      .eq("id", id);
-
-    if (unassignError) throw unassignError;
+  if (!isPoolDuaRow(dua)) {
+    throw new Error("INVALID_PAYLOAD:Only pool duas can be removed from admin");
   }
 
   const { error: deleteError } = await supabase.from("duas").delete().eq("id", id);
@@ -289,25 +278,16 @@ export async function unassignDuaForAdmin(id: number): Promise<void> {
   const supabase = createAdminClient();
   const { data: dua, error: fetchError } = await supabase
     .from("duas")
-    .select("id, used")
+    .select("id, used, assigned_guest_id")
     .eq("id", id)
     .maybeSingle();
 
   if (fetchError) throw fetchError;
   if (!dua) throw new Error("NOT_FOUND:Dua not found");
-  if (!dua.used) return;
+  if (isPoolDuaRow(dua)) return;
 
-  const { error: updateError } = await supabase
-    .from("duas")
-    .update({
-      used: false,
-      assigned_guest_id: null,
-      assigned_at: null,
-      accepted_at: null,
-    })
-    .eq("id", id);
-
-  if (updateError) throw updateError;
+  const { error: deleteError } = await supabase.from("duas").delete().eq("id", id);
+  if (deleteError) throw deleteError;
 }
 
 export async function listGuestsForAdmin(): Promise<AdminGuestItem[]> {
@@ -409,18 +389,13 @@ export async function deleteGuestForAdmin(
     storageFilesRemoved += 1;
   }
 
-  const { data: resetDuas, error: duaResetError } = await supabase
+  const { data: deletedDuas, error: duaDeleteError } = await supabase
     .from("duas")
-    .update({
-      used: false,
-      assigned_guest_id: null,
-      assigned_at: null,
-      accepted_at: null,
-    })
+    .delete()
     .eq("assigned_guest_id", guestId)
     .select("id");
 
-  if (duaResetError) throw duaResetError;
+  if (duaDeleteError) throw duaDeleteError;
 
   const { error: deleteError } = await supabase
     .from("guests")
@@ -432,7 +407,7 @@ export async function deleteGuestForAdmin(
   return {
     deleted: true,
     storage_files_removed: storageFilesRemoved,
-    duas_reset: resetDuas?.length ?? 0,
+    duas_reset: deletedDuas?.length ?? 0,
   };
 }
 
@@ -481,18 +456,14 @@ export async function resetAllGuestData(): Promise<AdminResetResult> {
     storageFilesRemoved += paths.length;
   }
 
-  const { data: resetDuas, error: duaResetError } = await supabase
+  const { data: deletedDuas, error: duaDeleteError } = await supabase
     .from("duas")
-    .update({
-      used: false,
-      assigned_guest_id: null,
-      assigned_at: null,
-      accepted_at: null,
-    })
+    .delete()
     .eq("used", true)
+    .not("assigned_guest_id", "is", null)
     .select("id");
 
-  if (duaResetError) throw duaResetError;
+  if (duaDeleteError) throw duaDeleteError;
 
   const { error: guestDeleteError } = await supabase
     .from("guests")
@@ -504,7 +475,7 @@ export async function resetAllGuestData(): Promise<AdminResetResult> {
   return {
     deleted_guests: guestCountResult.count ?? 0,
     storage_files_removed: storageFilesRemoved,
-    duas_reset: resetDuas?.length ?? 0,
+    duas_reset: deletedDuas?.length ?? 0,
   };
 }
 

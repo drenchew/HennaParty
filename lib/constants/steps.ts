@@ -42,7 +42,12 @@ export const GUEST_TOKEN_HEADER = "X-Guest-Token";
 
 export const MAX_PHOTOS_PER_GUEST = 3;
 
-export const MAX_VIDEO_DURATION_SECONDS = 60;
+export {
+  MAX_PHOTO_BYTES,
+  MAX_VIDEO_BYTES,
+  MAX_VIDEO_DURATION_SECONDS,
+  VIDEO_COMPRESS_THRESHOLD_BYTES,
+} from "@/lib/constants/media-limits";
 
 export const PHOTOS_BUCKET = "photos";
 

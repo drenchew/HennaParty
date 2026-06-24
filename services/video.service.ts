@@ -1,7 +1,10 @@
 import { getOrCreateGuestToken, guestAuthHeaders } from "@/lib/guest/session";
 import { uploadFileViaSignedUrl } from "@/lib/storage/client-upload";
+import {
+  prepareVideoForUpload,
+  VideoPrepareError,
+} from "@/lib/utils/video-compress";
 import type { ApiResponse } from "@/types";
-
 async function guestJsonFetch<T>(
   path: string,
   options: RequestInit = {},
@@ -41,6 +44,28 @@ export async function getVideoStatus() {
 
 /** Direct-to-Supabase video upload (bypasses Vercel body limit). */
 export async function uploadVideo(file: File, durationSeconds: number) {
+  let preparedFile = file;
+  let preparedDuration = durationSeconds;
+
+  try {
+    const prepared = await prepareVideoForUpload(file, durationSeconds);
+    preparedFile = prepared.file;
+    preparedDuration = prepared.durationSeconds;
+  } catch (error) {
+    if (error instanceof VideoPrepareError) {
+      const code =
+        error.code === "TOO_LONG"
+          ? "VIDEO_TOO_LONG"
+          : error.code === "TOO_LARGE"
+            ? "FILE_TOO_LARGE"
+            : error.code === "COMPRESS_FAILED"
+              ? "COMPRESS_FAILED"
+              : "INVALID_DURATION";
+      return { error: error.message, code };
+    }
+    throw error;
+  }
+
   const prepare = await guestJsonFetch<{
     upload: {
       bucket: string;
@@ -53,10 +78,10 @@ export async function uploadVideo(file: File, durationSeconds: number) {
   }>("/api/video/upload/prepare", {
     method: "POST",
     body: JSON.stringify({
-      mimeType: file.type,
-      size: file.size,
-      durationSeconds,
-      fileName: file.name,
+      mimeType: preparedFile.type,
+      size: preparedFile.size,
+      durationSeconds: preparedDuration,
+      fileName: preparedFile.name,
     }),
   });
 
@@ -67,7 +92,7 @@ export async function uploadVideo(file: File, durationSeconds: number) {
   try {
     await uploadFileViaSignedUrl(
       { bucket, path, token, contentType },
-      file,
+      preparedFile,
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : "Upload failed";
@@ -78,10 +103,10 @@ export async function uploadVideo(file: File, durationSeconds: number) {
     method: "POST",
     body: JSON.stringify({
       videoId,
-      mimeType: contentType ?? file.type,
-      size: file.size,
-      durationSeconds,
-      fileName: file.name,
+      mimeType: contentType ?? preparedFile.type,
+      size: preparedFile.size,
+      durationSeconds: preparedDuration,
+      fileName: preparedFile.name,
     }),
   });
 }

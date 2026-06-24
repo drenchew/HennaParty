@@ -1,4 +1,8 @@
-import { MAX_VIDEO_DURATION_SECONDS, VIDEOS_BUCKET } from "@/lib/constants/steps";
+import {
+  MAX_VIDEO_BYTES,
+  MAX_VIDEO_DURATION_SECONDS,
+} from "@/lib/constants/media-limits";
+import { VIDEOS_BUCKET } from "@/lib/constants/steps";
 
 export const ALLOWED_VIDEO_MIME_TYPES = [
   "video/webm",
@@ -8,8 +12,8 @@ export const ALLOWED_VIDEO_MIME_TYPES = [
 
 export type AllowedVideoMime = (typeof ALLOWED_VIDEO_MIME_TYPES)[number];
 
-/** 25 MB — matches Supabase bucket file_size_limit */
-export const MAX_VIDEO_BYTES = 25 * 1024 * 1024;
+/** 25 MB — Supabase videos bucket limit */
+export { MAX_VIDEO_BYTES };
 
 const MIME_EXTENSION: Record<AllowedVideoMime, string> = {
   "video/webm": "webm",

@@ -1,6 +1,9 @@
 import { pickRecorderMimeType } from "@/lib/utils/video-metadata";
 import type RecordRTC from "recordrtc";
 
+/** ~700 kbps keeps 30s recordings under ~15 MB. */
+const RECORDING_BITS_PER_SECOND = 700_000;
+
 const MIME_CANDIDATES = [
   "video/mp4",
   "video/mp4;codecs=avc1,mp4a.40.2",
@@ -78,8 +81,11 @@ function wrapRecordRtc(recorder: RecordRTC): BrowserVideoRecorder {
 function createMediaRecorderAdapter(stream: MediaStream): BrowserVideoRecorder {
   const mimeType = pickRecorderMimeType();
   const recorder = mimeType
-    ? new MediaRecorder(stream, { mimeType })
-    : new MediaRecorder(stream);
+    ? new MediaRecorder(stream, {
+        mimeType,
+        videoBitsPerSecond: RECORDING_BITS_PER_SECOND,
+      })
+    : new MediaRecorder(stream, { videoBitsPerSecond: RECORDING_BITS_PER_SECOND });
   const chunks: Blob[] = [];
 
   recorder.ondataavailable = (event) => {
@@ -134,6 +140,7 @@ async function tryCreateRecordRtcRecorder(
       type: "video",
       disableLogs: true,
       timeSlice: 1000,
+      bitsPerSecond: RECORDING_BITS_PER_SECOND,
     };
 
     if (mimeType) {

@@ -6,7 +6,7 @@ import { FlowNav } from "@/components/layout/FlowNavigation";
 import { StepGuard } from "@/components/layout/StepGuard";
 import { VideoCapsuleUpload } from "@/components/video/VideoCapsuleUpload";
 import { useFlowContext } from "@/components/providers/FlowProvider";
-import { STEP_ROUTES } from "@/lib/constants/steps";
+import { MAX_VIDEO_DURATION_SECONDS, STEP_ROUTES } from "@/lib/constants/steps";
 import { isApiError } from "@/lib/utils/api";
 import { formatUnlockDate } from "@/lib/utils/video-metadata";
 import { completeStep } from "@/services/mock/flow.service";
@@ -88,7 +88,7 @@ export function VideoPage() {
       <FlowLayout
         step="video"
         title="Video Time Capsule"
-        subtitle="Record or upload a short message (max 60 seconds). It will be locked for one year."
+        subtitle={`Record or upload a short message (max ${MAX_VIDEO_DURATION_SECONDS} seconds). It will be locked for one year.`}
         footer={
           !loading && (
             <FlowNav

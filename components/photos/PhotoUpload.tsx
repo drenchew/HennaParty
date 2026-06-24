@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useLocale } from "@/components/providers/LocaleProvider";
 import { MAX_PHOTOS_PER_GUEST } from "@/lib/constants/steps";
-import { compressImage } from "@/lib/utils/image-compress";
+import { preparePhotoForUpload, PhotoPrepareError } from "@/lib/utils/image-compress";
 import { isApiError } from "@/lib/utils/api";
 import {
   deletePhotoFromApi,
@@ -23,6 +23,7 @@ export function PhotoUpload() {
   });
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [compressing, setCompressing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
@@ -47,14 +48,16 @@ export function PhotoUpload() {
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     event.target.value = "";
-    if (!file || uploading || quota.remaining <= 0) return;
+    if (!file || uploading || compressing || quota.remaining <= 0) return;
 
-    setUploading(true);
+    setCompressing(true);
     setProgress(0);
     setError(null);
 
     try {
-      const compressed = await compressImage(file);
+      const compressed = await preparePhotoForUpload(file);
+      setCompressing(false);
+      setUploading(true);
       const result = await uploadPhotoWithProgress(compressed, setProgress);
 
       if (isApiError(result)) {
@@ -65,9 +68,14 @@ export function PhotoUpload() {
       }
 
       await loadPhotos();
-    } catch {
-      setError(t("photosUpload.processError"));
+    } catch (error) {
+      if (error instanceof PhotoPrepareError && error.code === "TOO_LARGE") {
+        setError(t("photosUpload.tooLarge"));
+      } else {
+        setError(t("photosUpload.processError"));
+      }
     } finally {
+      setCompressing(false);
       setUploading(false);
       setProgress(0);
     }
@@ -96,7 +104,7 @@ export function PhotoUpload() {
         {atLimit && t("photosUpload.limitReached")}
       </p>
 
-      {!atLimit && !uploading && (
+      {!atLimit && !uploading && !compressing && (
         <label className="flow-upload">
           <span>
             {t("photosUpload.addPhoto")} ({quota.remaining} {t("photosUpload.remaining")})
@@ -105,10 +113,16 @@ export function PhotoUpload() {
             type="file"
             accept="image/jpeg,image/png,image/webp,image/*"
             capture="environment"
-            disabled={uploading || atLimit}
+              disabled={uploading || compressing || atLimit}
             onChange={(e) => void handleFileChange(e)}
           />
         </label>
+      )}
+
+      {compressing && (
+        <p className="flow-loading" role="status" aria-live="polite">
+          {t("photosUpload.compressing")}
+        </p>
       )}
 
       {uploading && (

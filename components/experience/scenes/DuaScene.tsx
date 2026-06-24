@@ -38,7 +38,7 @@ export function DuaScene() {
 
     const result = await assignDuaFromApi();
     if (isApiError(result)) {
-      if (result.code === "DUA_POOL_EXHAUSTED") {
+      if (result.code === "DUA_POOL_EMPTY") {
         setLoadState("exhausted");
         return;
       }

@@ -13,6 +13,7 @@ import {
 } from "@/components/video/VideoCapsuleUpload";
 import { useFlowContext } from "@/components/providers/FlowProvider";
 import { useLocale } from "@/components/providers/LocaleProvider";
+import { MAX_VIDEO_DURATION_SECONDS } from "@/lib/constants/steps";
 import { useGuestHijabi } from "@/hooks/useGuestHijabi";
 import { isApiError } from "@/lib/utils/api";
 import { formatUnlockDate } from "@/lib/utils/video-metadata";
@@ -103,7 +104,9 @@ export function VideoScene() {
   }
 
   const videoSubtitle =
-    guestHijabi === true ? t("video.subtitleHijabi") : t("video.subtitleStandard");
+    guestHijabi === true
+      ? t("video.subtitleHijabi", { max: MAX_VIDEO_DURATION_SECONDS })
+      : t("video.subtitleStandard", { max: MAX_VIDEO_DURATION_SECONDS });
 
   const canUpload = guestHijabi !== null;
 

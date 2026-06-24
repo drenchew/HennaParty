@@ -1,3 +1,4 @@
+import { MAX_PHOTO_BYTES } from "@/lib/constants/media-limits";
 import { MAX_PHOTOS_PER_GUEST, PHOTOS_BUCKET } from "@/lib/constants/steps";
 
 export const ALLOWED_PHOTO_MIME_TYPES = [
@@ -10,8 +11,8 @@ export const ALLOWED_PHOTO_MIME_TYPES = [
 
 export type AllowedPhotoMime = (typeof ALLOWED_PHOTO_MIME_TYPES)[number];
 
-/** 5 MB — matches Supabase photos bucket file_size_limit */
-export const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
+/** 5 MB — Supabase photos bucket limit */
+export { MAX_PHOTO_BYTES };
 
 const MIME_EXTENSION: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -47,7 +48,7 @@ export function validatePhotoMeta(
     return {
       ok: false,
       code: "FILE_TOO_LARGE",
-      message: "Photo must be under 5 MB after compression",
+      message: "Photo must be under 5 MB",
     };
   }
 

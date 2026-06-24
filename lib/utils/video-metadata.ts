@@ -1,4 +1,4 @@
-import { MAX_VIDEO_DURATION_SECONDS } from "@/lib/constants/steps";
+import { MAX_VIDEO_DURATION_SECONDS } from "@/lib/constants/media-limits";
 import { normalizeVideoMime } from "@/lib/video/validation";
 
 /** Measure duration of a local video file via browser metadata. */

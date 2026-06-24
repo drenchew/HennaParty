@@ -12,9 +12,12 @@ import { CameraAccessError, getCameraStream } from "@/lib/video/camera-stream";
 import {
   fileFromRecordedBlob,
   formatDuration,
-  getVideoFileDuration,
   validateDuration,
 } from "@/lib/utils/video-metadata";
+import {
+  prepareVideoForUpload,
+  VideoPrepareError,
+} from "@/lib/utils/video-compress";
 
 export type VideoUploadMode = "choose" | "recording" | "processing" | "preview";
 
@@ -254,10 +257,22 @@ export function VideoCapsuleUpload({
     setUploadMode("processing");
 
     try {
-      const metadataDuration = await getVideoFileDuration(file);
-      setReadyFile(file, metadataDuration);
-    } catch {
-      setError(t("videoUpload.readError"));
+      const prepared = await prepareVideoForUpload(file);
+      setReadyFile(prepared.file, prepared.durationSeconds);
+    } catch (error) {
+      if (error instanceof VideoPrepareError) {
+        if (error.code === "TOO_LONG") {
+          setError(t("videoUpload.tooLong", { max: MAX_VIDEO_DURATION_SECONDS }));
+        } else if (error.code === "TOO_LARGE") {
+          setError(t("videoUpload.tooLargeAfterCompress"));
+        } else if (error.code === "COMPRESS_FAILED") {
+          setError(t("videoUpload.compressFailed"));
+        } else {
+          setError(t("videoUpload.invalidDuration"));
+        }
+      } else {
+        setError(t("videoUpload.readError"));
+      }
       setUploadMode("choose");
     }
   }

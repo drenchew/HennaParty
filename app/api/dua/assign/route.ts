@@ -11,9 +11,8 @@ import { assignDuaToGuest } from "@/lib/dua/server";
 /**
  * POST /api/dua/assign
  * - Upserts guest by guest_token
- * - Assigns one unused dua (marks used = true)
- * - Idempotent: same guest always gets the same dua
- * - Race-safe: assign_dua() uses FOR UPDATE SKIP LOCKED
+ * - Picks a random dua from the pool (pool rows are never consumed)
+ * - Idempotent: same guest always gets the same assignment on reload
  */
 export async function POST(request: NextRequest) {
   try {
@@ -24,11 +23,11 @@ export async function POST(request: NextRequest) {
     return jsonOk({ dua });
   } catch (error) {
     if (error instanceof Error) {
-      if (error.message === "DUA_POOL_EXHAUSTED") {
+      if (error.message === "DUA_POOL_EMPTY") {
         return jsonError(
-          "All duas have been shared tonight. JazakAllah khayr!",
+          "No duas are in the pool yet. Please ask the host to add duas.",
           409,
-          "DUA_POOL_EXHAUSTED",
+          "DUA_POOL_EMPTY",
         );
       }
       if (error.message === "GUEST_NOT_FOUND") {

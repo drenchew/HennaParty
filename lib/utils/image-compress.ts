@@ -1,5 +1,17 @@
+import { PHOTO_COMPRESS_TARGET_BYTES } from "@/lib/constants/media-limits";
+
 const DEFAULT_MAX_EDGE = 1920;
 const DEFAULT_QUALITY = 0.82;
+
+export class PhotoPrepareError extends Error {
+  readonly code: "TOO_LARGE" | "INVALID";
+
+  constructor(code: PhotoPrepareError["code"], message?: string) {
+    super(message ?? code);
+    this.name = "PhotoPrepareError";
+    this.code = code;
+  }
+}
 
 export interface CompressOptions {
   maxWidth?: number;
@@ -27,7 +39,7 @@ export async function compressImage(
       : "image/jpeg");
 
   if (!file.type.startsWith("image/")) {
-    throw new Error("Not an image file");
+    throw new PhotoPrepareError("INVALID", "Not an image file");
   }
 
   const bitmap = await loadImageSource(file);
@@ -38,7 +50,7 @@ export async function compressImage(
   canvas.height = height;
 
   const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Canvas not supported");
+  if (!ctx) throw new PhotoPrepareError("INVALID", "Canvas not supported");
 
   ctx.drawImage(bitmap, 0, 0, width, height);
   if ("close" in bitmap && typeof bitmap.close === "function") {
@@ -53,6 +65,42 @@ export async function compressImage(
     type: targetMime,
     lastModified: Date.now(),
   });
+}
+
+/** Always compress and shrink until the photo is at most 3 MB. */
+export async function preparePhotoForUpload(file: File): Promise<File> {
+  let quality = DEFAULT_QUALITY;
+  let maxEdge = DEFAULT_MAX_EDGE;
+  let result = await compressImage(file, {
+    quality,
+    maxWidth: maxEdge,
+    maxHeight: maxEdge,
+  });
+
+  while (result.size > PHOTO_COMPRESS_TARGET_BYTES && quality > 0.45) {
+    quality -= 0.1;
+    result = await compressImage(file, {
+      quality,
+      maxWidth: maxEdge,
+      maxHeight: maxEdge,
+    });
+  }
+
+  while (result.size > PHOTO_COMPRESS_TARGET_BYTES && maxEdge > 800) {
+    maxEdge = Math.round(maxEdge * 0.75);
+    quality = 0.72;
+    result = await compressImage(file, {
+      quality,
+      maxWidth: maxEdge,
+      maxHeight: maxEdge,
+    });
+  }
+
+  if (result.size > PHOTO_COMPRESS_TARGET_BYTES) {
+    throw new PhotoPrepareError("TOO_LARGE", "Photo still too large after compression");
+  }
+
+  return result;
 }
 
 async function loadImageSource(file: File): Promise<ImageBitmap | HTMLImageElement> {
@@ -77,7 +125,7 @@ function loadHtmlImage(file: File): Promise<HTMLImageElement> {
     };
     img.onerror = () => {
       URL.revokeObjectURL(url);
-      reject(new Error("Could not decode image"));
+      reject(new PhotoPrepareError("INVALID", "Could not decode image"));
     };
     img.src = url;
   });
@@ -109,7 +157,7 @@ function canvasToBlob(
     canvas.toBlob(
       (blob) => {
         if (!blob) {
-          reject(new Error("Compression failed"));
+          reject(new PhotoPrepareError("INVALID", "Compression failed"));
           return;
         }
         resolve(blob);
