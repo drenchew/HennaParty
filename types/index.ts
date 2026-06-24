@@ -60,13 +60,7 @@ export interface Vote {
 export interface QuestionnaireQuestion {
   id: number;
   question_text: string;
-  options: QuestionnaireOption[];
-}
-
-export interface QuestionnaireOption {
-  id: number;
-  question_id: number;
-  option_text: string;
+  question_text_ar?: string;
 }
 
 export interface EventStats {

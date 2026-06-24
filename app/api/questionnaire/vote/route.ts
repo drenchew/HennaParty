@@ -7,10 +7,10 @@ import {
   unauthorized,
 } from "@/lib/api/response";
 import { findGuestByToken } from "@/lib/guest/server";
-import { isValidAnswer } from "@/lib/questionnaire/server";
+import { validateVotePayload } from "@/lib/vote/validation";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-/** POST /api/questionnaire/vote — record one answer per question per guest. */
+/** POST /api/questionnaire/vote — record one open answer per question per guest. */
 export async function POST(request: NextRequest) {
   try {
     const guestToken = requireGuestToken(request);
@@ -24,22 +24,20 @@ export async function POST(request: NextRequest) {
       answer?: string;
     };
 
-    const questionId = body.question_id;
-    const answer = body.answer?.trim();
-
-    if (!questionId || !answer) {
-      return jsonError("question_id and answer are required", 400, "INVALID_PAYLOAD");
-    }
-
-    if (!(await isValidAnswer(questionId, answer))) {
-      return jsonError("Invalid question or answer", 400, "INVALID_VOTE");
+    const validation = await validateVotePayload(body.question_id, body.answer);
+    if (!validation.ok) {
+      return jsonError(validation.error, 400, validation.code);
     }
 
     const supabase = createAdminClient();
     const { data, error } = await supabase
       .from("votes")
       .upsert(
-        { guest_id: guest.id, question_id: questionId, answer },
+        {
+          guest_id: guest.id,
+          question_id: validation.question_id,
+          answer: validation.answer,
+        },
         { onConflict: "guest_id,question_id" },
       )
       .select("id, guest_id, question_id, answer")

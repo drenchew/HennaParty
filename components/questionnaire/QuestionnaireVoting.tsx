@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useLocale } from "@/components/providers/LocaleProvider";
+import { OPEN_ANSWER_MAX_LENGTH } from "@/lib/questionnaire/constants";
 import { isApiError } from "@/lib/utils/api";
 import {
   getVoteState,
@@ -21,13 +22,6 @@ function questionLabel(question: VoteQuestion, locale: "en" | "ar"): string {
   return locale === "ar" ? question.question_text_ar : question.question_text;
 }
 
-function optionLabel(
-  option: VoteQuestion["options"][number],
-  locale: "en" | "ar",
-): string {
-  return locale === "ar" ? option.label_ar : option.label_en;
-}
-
 export function QuestionnaireVoting({
   onVotesChange,
   onQuestionCountChange,
@@ -38,9 +32,10 @@ export function QuestionnaireVoting({
   const [questionCount, setQuestionCount] = useState(0);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [draft, setDraft] = useState("");
   const [results, setResults] = useState<QuestionResult[]>([]);
   const [loading, setLoading] = useState(true);
-  const [votingId, setVotingId] = useState<number | null>(null);
+  const [saving, setSaving] = useState(false);
   const [showLiveResults, setShowLiveResults] = useState(showLiveResultsDefault);
   const [error, setError] = useState<string | null>(null);
 
@@ -73,42 +68,51 @@ export function QuestionnaireVoting({
     })();
   }, [loadState, showLiveResults]);
 
-
   useEffect(() => {
     if (questions.length === 0) return;
     setCurrentIndex((prev) => Math.min(prev, questions.length - 1));
   }, [questions.length]);
 
-  async function handleSelect(questionId: number, answer: string) {
-    if (votingId !== null) return;
+  const currentQuestion = questions[currentIndex];
 
-    setVotingId(questionId);
-    setError(null);
+  useEffect(() => {
+    if (!currentQuestion) return;
+    setDraft(answers[currentQuestion.id] ?? "");
+  }, [currentQuestion, answers]);
 
-    const response = await submitVote(questionId, answer);
-    if (isApiError(response)) {
-      setError(response.error);
-      setVotingId(null);
+  async function handleSave() {
+    if (!currentQuestion || saving) return;
+
+    const trimmed = draft.trim();
+    if (!trimmed) {
+      setError(t("questionnaireUi.emptyAnswer"));
       return;
     }
 
-    const next = { ...answers, [questionId]: answer };
+    if (trimmed.length > OPEN_ANSWER_MAX_LENGTH) {
+      setError(t("questionnaireUi.answerTooLong", { max: OPEN_ANSWER_MAX_LENGTH }));
+      return;
+    }
+
+    setSaving(true);
+    setError(null);
+
+    const response = await submitVote(currentQuestion.id, trimmed);
+    if (isApiError(response)) {
+      setError(response.error);
+      setSaving(false);
+      return;
+    }
+
+    const next = { ...answers, [currentQuestion.id]: trimmed };
     setAnswers(next);
     onVotesChange?.(next);
-
-    const questionIndex = questions.findIndex((question) => question.id === questionId);
-    const nextUnanswered = questions.findIndex(
-      (question, index) => index > questionIndex && !next[question.id],
-    );
-    if (nextUnanswered >= 0) {
-      setCurrentIndex(nextUnanswered);
-    }
 
     if (showLiveResults) {
       await loadState(true);
     }
 
-    setVotingId(null);
+    setSaving(false);
   }
 
   async function toggleLiveResults() {
@@ -119,9 +123,9 @@ export function QuestionnaireVoting({
     }
   }
 
-  const answeredCount = Object.keys(answers).length;
+  const answeredCount = Object.values(answers).filter((answer) => answer.trim()).length;
   const allAnswered = questionCount > 0 && answeredCount >= questionCount;
-  const currentQuestion = questions[currentIndex];
+  const savedAnswer = currentQuestion ? answers[currentQuestion.id]?.trim() : "";
 
   if (loading) {
     return <p className="flow-loading">{t("questionnaireUi.loading")}</p>;
@@ -158,42 +162,52 @@ export function QuestionnaireVoting({
               current: index + 1,
               total: questions.length,
             })}
-            className={`questionnaire-dots__dot${index === currentIndex ? " questionnaire-dots__dot--active" : ""}${answers[question.id] ? " questionnaire-dots__dot--done" : ""}`}
+            className={`questionnaire-dots__dot${index === currentIndex ? " questionnaire-dots__dot--active" : ""}${answers[question.id]?.trim() ? " questionnaire-dots__dot--done" : ""}`}
             onClick={() => setCurrentIndex(index)}
           />
         ))}
       </div>
 
-      <fieldset className="flow-card flow-question questionnaire-card">
-        <legend className="flow-question-title questionnaire-card__title">
+      <div className="flow-card flow-question questionnaire-card">
+        <h3 className="flow-question-title questionnaire-card__title">
           {questionLabel(currentQuestion, locale)}
-        </legend>
+        </h3>
         <p className="questionnaire-card__meta">
           {t("questionnaireUi.questionOf", {
             current: currentIndex + 1,
             total: questions.length,
           })}
         </p>
-        <div className="flow-options questionnaire-options">
-          {currentQuestion.options.map((option) => {
-            const canonical = option.option_text;
-            const selected = answers[currentQuestion.id] === canonical;
-            const busy = votingId === currentQuestion.id;
-            return (
-              <button
-                key={canonical}
-                type="button"
-                disabled={busy}
-                className={`flow-option questionnaire-option${selected ? " flow-option--selected" : ""}`}
-                aria-pressed={selected}
-                onClick={() => void handleSelect(currentQuestion.id, canonical)}
-              >
-                {optionLabel(option, locale)}
-              </button>
-            );
-          })}
-        </div>
-      </fieldset>
+
+        <label className="questionnaire-open-answer">
+          <span className="sr-only">{t("questionnaireUi.yourAnswer")}</span>
+          <textarea
+            className="flow-textarea questionnaire-open-answer__input"
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            placeholder={t("questionnaireUi.answerPlaceholder")}
+            maxLength={OPEN_ANSWER_MAX_LENGTH}
+            rows={4}
+            disabled={saving}
+          />
+        </label>
+
+        <p className="flow-meta questionnaire-open-answer__meta">
+          {draft.trim().length}/{OPEN_ANSWER_MAX_LENGTH}
+          {savedAnswer && draft.trim() === savedAnswer
+            ? ` · ${t("questionnaireUi.saved")}`
+            : ""}
+        </p>
+
+        <button
+          type="button"
+          className="flow-btn flow-btn--primary"
+          disabled={saving || !draft.trim()}
+          onClick={() => void handleSave()}
+        >
+          {saving ? t("questionnaireUi.saving") : t("questionnaireUi.saveAnswer")}
+        </button>
+      </div>
 
       <div className="questionnaire-step-nav">
         <button

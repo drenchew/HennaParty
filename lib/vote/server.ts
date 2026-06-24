@@ -1,7 +1,6 @@
 import {
   formatQuestionsForClient,
   getQuestionnaireQuestionCount,
-  isValidAnswer,
   listQuestionnaireQuestions,
 } from "@/lib/questionnaire/server";
 import { findGuestByToken, upsertGuest } from "@/lib/guest/server";
@@ -20,10 +19,8 @@ export interface QuestionResult {
   question_text: string;
   question_text_ar: string;
   total_votes: number;
-  options: Array<{
+  answers: Array<{
     answer: string;
-    label_en: string;
-    label_ar: string;
     count: number;
     percentage: number;
   }>;
@@ -101,23 +98,27 @@ export async function getLiveResults(): Promise<QuestionResult[]> {
     const rows = votes.filter((vote) => vote.question_id === question.id);
     const total = rows.length;
 
-    const options = question.options.map((option) => {
-      const count = rows.filter((row) => row.answer === option.answer).length;
-      return {
-        answer: option.answer,
-        label_en: option.en,
-        label_ar: option.ar,
+    const counts = new Map<string, number>();
+    for (const row of rows) {
+      const text = row.answer.trim();
+      if (!text) continue;
+      counts.set(text, (counts.get(text) ?? 0) + 1);
+    }
+
+    const answers = [...counts.entries()]
+      .map(([answer, count]) => ({
+        answer,
         count,
         percentage: total > 0 ? Math.round((count / total) * 100) : 0,
-      };
-    });
+      }))
+      .sort((a, b) => b.count - a.count || a.answer.localeCompare(b.answer));
 
     return {
       question_id: question.id,
       question_text: question.question_en,
       question_text_ar: question.question_ar,
       total_votes: total,
-      options,
+      answers,
     };
   });
 }
@@ -126,11 +127,9 @@ export async function isQuestionnaireComplete(
   votes: Record<number, string>,
 ): Promise<boolean> {
   const questions = await listQuestionnaireQuestions();
-  return questions.every((question) => Boolean(votes[question.id]));
+  return questions.every((question) => Boolean(votes[question.id]?.trim()));
 }
 
 export async function getQuestionnaireQuestionCountForGuest(): Promise<number> {
   return getQuestionnaireQuestionCount();
 }
-
-export { isValidAnswer };

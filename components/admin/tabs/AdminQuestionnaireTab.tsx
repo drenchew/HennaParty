@@ -6,18 +6,10 @@ import type { QuestionnaireQuestion } from "@/lib/questionnaire/types";
 import type { QuestionResult } from "@/lib/vote/server";
 import { isApiError } from "@/lib/utils/api";
 
-interface EditableOption {
-  answer: string;
-  label_en: string;
-  label_ar: string;
-  previous_answer: string;
-}
-
 interface EditableQuestion {
   id: number;
   question_en: string;
   question_ar: string;
-  options: EditableOption[];
 }
 
 function toEditable(question: QuestionnaireQuestion): EditableQuestion {
@@ -25,12 +17,6 @@ function toEditable(question: QuestionnaireQuestion): EditableQuestion {
     id: question.id,
     question_en: question.question_en,
     question_ar: question.question_ar,
-    options: question.options.map((option) => ({
-      answer: option.answer,
-      label_en: option.en,
-      label_ar: option.ar,
-      previous_answer: option.answer,
-    })),
   };
 }
 
@@ -86,22 +72,6 @@ export function AdminQuestionnaireTab() {
     );
   }
 
-  function updateOption(
-    questionId: number,
-    index: number,
-    patch: Partial<EditableOption>,
-  ) {
-    setQuestions((current) =>
-      current.map((question) => {
-        if (question.id !== questionId) return question;
-        const options = question.options.map((option, optionIndex) =>
-          optionIndex === index ? { ...option, ...patch } : option,
-        );
-        return { ...question, options };
-      }),
-    );
-  }
-
   async function handleSave(question: EditableQuestion) {
     setSavingId(question.id);
     setError(null);
@@ -114,12 +84,6 @@ export function AdminQuestionnaireTab() {
         body: JSON.stringify({
           question_en: question.question_en,
           question_ar: question.question_ar,
-          options: question.options.map((option) => ({
-            answer: option.answer,
-            label_en: option.label_en,
-            label_ar: option.label_ar,
-            previous_answer: option.previous_answer,
-          })),
         }),
       },
     );
@@ -153,8 +117,7 @@ export function AdminQuestionnaireTab() {
           <section className="admin-question-edit-list">
             <h3 className="admin-subtitle">Edit questions</h3>
             <p className="flow-meta admin-question-edit-note">
-              Changes apply immediately for guests. Keep each answer key unique — if you
-              rename a key, existing votes are updated automatically.
+              Guests type their own answers. Edit the question text in English and Arabic.
             </p>
 
             {questions.map((question) => (
@@ -193,45 +156,6 @@ export function AdminQuestionnaireTab() {
                   />
                 </label>
 
-                <div className="admin-option-edit-list">
-                  {question.options.map((option, index) => (
-                    <div key={`${question.id}-${index}`} className="admin-option-edit">
-                      <p className="flow-meta">Option {index + 1}</p>
-                      <label className="admin-field">
-                        <span className="admin-field__label">Answer key (stored in votes)</span>
-                        <input
-                          className="flow-input"
-                          value={option.answer}
-                          onChange={(event) =>
-                            updateOption(question.id, index, { answer: event.target.value })
-                          }
-                        />
-                      </label>
-                      <label className="admin-field">
-                        <span className="admin-field__label">English label</span>
-                        <input
-                          className="flow-input"
-                          value={option.label_en}
-                          onChange={(event) =>
-                            updateOption(question.id, index, { label_en: event.target.value })
-                          }
-                        />
-                      </label>
-                      <label className="admin-field">
-                        <span className="admin-field__label">Arabic label</span>
-                        <input
-                          className="flow-input"
-                          value={option.label_ar}
-                          onChange={(event) =>
-                            updateOption(question.id, index, { label_ar: event.target.value })
-                          }
-                          dir="rtl"
-                        />
-                      </label>
-                    </div>
-                  ))}
-                </div>
-
                 <button
                   type="submit"
                   className="flow-btn flow-btn--primary"
@@ -244,32 +168,27 @@ export function AdminQuestionnaireTab() {
           </section>
 
           <section className="admin-question-list">
-            <h3 className="admin-subtitle">Live results</h3>
+            <h3 className="admin-subtitle">Guest responses</h3>
             {results.map((question) => (
               <section key={question.question_id} className="flow-card admin-question-card">
                 <h4 className="admin-subtitle">{question.question_text}</h4>
                 <p className="flow-meta">{question.question_text_ar}</p>
-                <p className="flow-meta">{question.total_votes} votes</p>
-                <ul className="admin-vote-bars">
-                  {question.options.map((option) => (
-                    <li key={option.answer} className="admin-vote-row">
-                      <div className="admin-vote-row__label">
-                        <span>
-                          {option.label_en} / {option.label_ar}
-                        </span>
-                        <span>
-                          {option.count} ({option.percentage}%)
-                        </span>
-                      </div>
-                      <div className="admin-vote-bar">
-                        <div
-                          className="admin-vote-bar__fill"
-                          style={{ width: `${option.percentage}%` }}
-                        />
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                <p className="flow-meta">{question.total_votes} responses</p>
+                {question.answers.length > 0 ? (
+                  <ul className="admin-open-answers">
+                    {question.answers.map((item) => (
+                      <li key={item.answer} className="admin-open-answer">
+                        <p className="admin-open-answer__text">{item.answer}</p>
+                        <p className="flow-meta">
+                          {item.count} guest{item.count === 1 ? "" : "s"}
+                          {question.total_votes > 1 ? ` (${item.percentage}%)` : ""}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="flow-meta">No responses yet.</p>
+                )}
               </section>
             ))}
           </section>

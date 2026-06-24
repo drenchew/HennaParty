@@ -1184,6 +1184,49 @@
     @apply min-h-[3.25rem];
   }
 
+  .questionnaire-open-answer {
+    @apply flex flex-col gap-2;
+  }
+
+  .questionnaire-open-answer__input {
+    @apply min-h-[7rem] resize-y;
+  }
+
+  .questionnaire-open-answer__meta {
+    @apply text-right;
+  }
+
+  [dir="rtl"] .questionnaire-open-answer__meta {
+    @apply text-left;
+  }
+
+  .live-results-answers {
+    @apply flex flex-col gap-3;
+  }
+
+  .live-results-answer {
+    @apply rounded-xl border px-3 py-2;
+    border-color: color-mix(in srgb, var(--henna-gold) 18%, transparent);
+    background: color-mix(in srgb, var(--henna-glass) 88%, transparent);
+  }
+
+  .live-results-answer__text {
+    @apply whitespace-pre-wrap text-sm leading-relaxed;
+  }
+
+  .admin-open-answers {
+    @apply flex flex-col gap-3;
+  }
+
+  .admin-open-answer {
+    @apply rounded-lg border px-3 py-2;
+    border-color: color-mix(in srgb, var(--henna-gold) 15%, transparent);
+  }
+
+  .admin-open-answer__text {
+    @apply whitespace-pre-wrap text-sm;
+  }
+
   .questionnaire-step-nav {
     @apply flex shrink-0 gap-2;
   }

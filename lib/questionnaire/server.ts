@@ -1,7 +1,9 @@
 import { isSchemaNotInitialized } from "@/lib/api/supabase-errors";
-import { QUESTIONNAIRE as DEFAULT_QUESTIONNAIRE } from "@/lib/questionnaire/constants";
+import {
+  OPEN_ANSWER_MAX_LENGTH,
+  QUESTIONNAIRE as DEFAULT_QUESTIONNAIRE,
+} from "@/lib/questionnaire/constants";
 import type {
-  QuestionnaireOption,
   QuestionnaireQuestion,
   UpdateQuestionnaireQuestionInput,
 } from "@/lib/questionnaire/types";
@@ -12,23 +14,6 @@ interface QuestionRow {
   sort_order: number;
   question_en: string;
   question_ar: string;
-  options: unknown;
-}
-
-function parseOptions(raw: unknown): QuestionnaireOption[] {
-  if (!Array.isArray(raw)) return [];
-
-  return raw
-    .map((item) => {
-      if (!item || typeof item !== "object") return null;
-      const row = item as Record<string, unknown>;
-      const answer = typeof row.answer === "string" ? row.answer.trim() : "";
-      const en = typeof row.en === "string" ? row.en.trim() : "";
-      const ar = typeof row.ar === "string" ? row.ar.trim() : "";
-      if (!answer || !en || !ar) return null;
-      return { answer, en, ar } satisfies QuestionnaireOption;
-    })
-    .filter((item): item is QuestionnaireOption => item !== null);
 }
 
 function mapRow(row: QuestionRow): QuestionnaireQuestion {
@@ -37,65 +22,29 @@ function mapRow(row: QuestionRow): QuestionnaireQuestion {
     sort_order: row.sort_order,
     question_en: row.question_en,
     question_ar: row.question_ar,
-    options: parseOptions(row.options),
   };
 }
 
+const DEFAULT_ARABIC: Record<number, string> = {
+  1: "ماذا يجب أن نفعل في سنتنا الأولى؟",
+  2: "ما الأهم في الزواج؟",
+  3: "أين يجب أن نسافر أولاً؟",
+};
+
 function defaultQuestionsFromConstants(): QuestionnaireQuestion[] {
-  return DEFAULT_QUESTIONNAIRE.map((question, index) => {
-    const display = {
-      1: {
-        ar: "ماذا يجب أن نفعل في سنتنا الأولى؟",
-        options: {
-          "Travel the world": "نسافر حول العالم",
-          "Focus on faith & family": "نركز على الإيمان والعائلة",
-          "Build our home together": "نبني بيتنا معاً",
-          "Celebrate every moment": "نحتفل بكل لحظة",
-        },
-      },
-      2: {
-        ar: "ما الأهم في الزواج؟",
-        options: {
-          Trust: "الثقة",
-          Communication: "التواصل",
-          Patience: "الصبر",
-          Laughter: "الضحك",
-        },
-      },
-      3: {
-        ar: "أين يجب أن نسافر أولاً؟",
-        options: {
-          "Makkah / Umrah": "مكة / العمرة",
-          "Tropical beach": "شاطئ استوائي",
-          "European cities": "مدن أوروبية",
-          "Somewhere new together": "مكاناً جديداً معاً",
-        },
-      },
-    } as const;
-
-    const labels = display[question.id as 1 | 2 | 3];
-
-    return {
-      id: question.id,
-      sort_order: index + 1,
-      question_en: question.question_text,
-      question_ar: labels?.ar ?? question.question_text,
-      options: question.options.map((answer) => ({
-        answer,
-        en: answer,
-        ar:
-          (labels?.options as Record<string, string> | undefined)?.[answer] ??
-          answer,
-      })),
-    };
-  });
+  return DEFAULT_QUESTIONNAIRE.map((question, index) => ({
+    id: question.id,
+    sort_order: index + 1,
+    question_en: question.question_text,
+    question_ar: DEFAULT_ARABIC[question.id] ?? question.question_text,
+  }));
 }
 
 export async function listQuestionnaireQuestions(): Promise<QuestionnaireQuestion[]> {
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("questionnaire_questions")
-    .select("id, sort_order, question_en, question_ar, options")
+    .select("id, sort_order, question_en, question_ar")
     .order("sort_order", { ascending: true })
     .order("id", { ascending: true });
 
@@ -131,7 +80,9 @@ export async function isValidAnswer(
 ): Promise<boolean> {
   const question = await getQuestionById(questionId);
   if (!question) return false;
-  return question.options.some((option) => option.answer === answer);
+
+  const trimmed = answer.trim();
+  return trimmed.length > 0 && trimmed.length <= OPEN_ANSWER_MAX_LENGTH;
 }
 
 export function formatQuestionsForClient(questions: QuestionnaireQuestion[]) {
@@ -139,13 +90,6 @@ export function formatQuestionsForClient(questions: QuestionnaireQuestion[]) {
     id: question.id,
     question_text: question.question_en,
     question_text_ar: question.question_ar,
-    options: question.options.map((option, index) => ({
-      id: index + 1,
-      question_id: question.id,
-      option_text: option.answer,
-      label_en: option.en,
-      label_ar: option.ar,
-    })),
   }));
 }
 
@@ -163,37 +107,7 @@ function validateQuestionInput(
     throw new Error("INVALID_PAYLOAD:Question text is too long (max 500 characters)");
   }
 
-  if (!Array.isArray(input.options) || input.options.length < 2) {
-    throw new Error("INVALID_PAYLOAD:At least 2 answer options are required");
-  }
-
-  if (input.options.length > 8) {
-    throw new Error("INVALID_PAYLOAD:Maximum 8 answer options allowed");
-  }
-
-  const options = input.options.map((option) => {
-    const answer = option.answer.trim();
-    const en = option.label_en.trim();
-    const ar = option.label_ar.trim();
-    const previous_answer = option.previous_answer?.trim() || undefined;
-
-    if (!answer || !en || !ar) {
-      throw new Error("INVALID_PAYLOAD:Each option needs answer key and both labels");
-    }
-
-    if (answer.length > 200 || en.length > 200 || ar.length > 200) {
-      throw new Error("INVALID_PAYLOAD:Option text is too long (max 200 characters)");
-    }
-
-    return { answer, label_en: en, label_ar: ar, previous_answer };
-  });
-
-  const answerKeys = new Set(options.map((option) => option.answer));
-  if (answerKeys.size !== options.length) {
-    throw new Error("INVALID_PAYLOAD:Duplicate answer keys are not allowed");
-  }
-
-  return { question_en, question_ar, options };
+  return { question_en, question_ar };
 }
 
 export async function updateQuestionnaireQuestionForAdmin(
@@ -219,38 +133,20 @@ export async function updateQuestionnaireQuestionForAdmin(
   }
   if (!existing) throw new Error("NOT_FOUND:Question not found");
 
-  for (const option of input.options) {
-    if (!option.previous_answer || option.previous_answer === option.answer) {
-      continue;
-    }
-
-    const { error: voteError } = await supabase
-      .from("votes")
-      .update({ answer: option.answer })
-      .eq("question_id", id)
-      .eq("answer", option.previous_answer);
-
-    if (voteError) throw voteError;
-  }
-
-  const optionsJson = input.options.map((option) => ({
-    answer: option.answer,
-    en: option.label_en,
-    ar: option.label_ar,
-  }));
-
   const { data, error } = await supabase
     .from("questionnaire_questions")
     .update({
       question_en: input.question_en,
       question_ar: input.question_ar,
-      options: optionsJson,
+      options: [],
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)
-    .select("id, sort_order, question_en, question_ar, options")
+    .select("id, sort_order, question_en, question_ar")
     .single();
 
   if (error) throw error;
   return mapRow(data as QuestionRow);
 }
+
+export { OPEN_ANSWER_MAX_LENGTH };

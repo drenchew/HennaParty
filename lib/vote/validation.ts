@@ -1,4 +1,4 @@
-import { isValidAnswer } from "@/lib/questionnaire/server";
+import { getQuestionById, OPEN_ANSWER_MAX_LENGTH } from "@/lib/questionnaire/server";
 
 export async function validateVotePayload(
   questionId: unknown,
@@ -18,8 +18,16 @@ export async function validateVotePayload(
     return { ok: false, code: "INVALID_PAYLOAD", error: "answer is required" };
   }
 
-  if (!(await isValidAnswer(id, text))) {
-    return { ok: false, code: "INVALID_VOTE", error: "Invalid question or answer option" };
+  if (text.length > OPEN_ANSWER_MAX_LENGTH) {
+    return {
+      ok: false,
+      code: "INVALID_PAYLOAD",
+      error: `Answer must be ${OPEN_ANSWER_MAX_LENGTH} characters or less`,
+    };
+  }
+
+  if (!(await getQuestionById(id))) {
+    return { ok: false, code: "INVALID_VOTE", error: "Unknown question" };
   }
 
   return { ok: true, question_id: id, answer: text };

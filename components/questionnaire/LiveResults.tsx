@@ -19,28 +19,23 @@ export function LiveResults({ results }: LiveResultsProps) {
             {locale === "ar" ? question.question_text_ar : question.question_text}
           </h3>
           <p className="flow-meta">
-            {question.total_votes} {t("questionnaireUi.votes")}
+            {question.total_votes} {t("questionnaireUi.responses")}
           </p>
-          <ul className="live-results-bars">
-            {question.options.map((option) => (
-              <li key={option.answer} className="live-results-row">
-                <div className="live-results-label">
-                  <span>
-                    {locale === "ar" ? option.label_ar : option.label_en}
-                  </span>
-                  <span>
-                    {option.percentage}% ({option.count})
-                  </span>
-                </div>
-                <div className="live-results-track">
-                  <div
-                    className="live-results-fill"
-                    style={{ width: `${option.percentage}%` }}
-                  />
-                </div>
-              </li>
-            ))}
-          </ul>
+          {question.answers.length > 0 ? (
+            <ul className="live-results-answers">
+              {question.answers.map((item) => (
+                <li key={item.answer} className="live-results-answer">
+                  <p className="live-results-answer__text">{item.answer}</p>
+                  <p className="flow-meta">
+                    {item.count} {t("questionnaireUi.responses")}
+                    {question.total_votes > 1 ? ` (${item.percentage}%)` : ""}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="flow-meta">{t("questionnaireUi.noResponsesYet")}</p>
+          )}
         </div>
       ))}
     </section>

@@ -5,13 +5,6 @@ export interface VoteQuestion {
   id: number;
   question_text: string;
   question_text_ar: string;
-  options: Array<{
-    id: number;
-    question_id: number;
-    option_text: string;
-    label_en: string;
-    label_ar: string;
-  }>;
 }
 
 export interface VoteRecord {
@@ -26,10 +19,8 @@ export interface QuestionResult {
   question_text: string;
   question_text_ar: string;
   total_votes: number;
-  options: Array<{
+  answers: Array<{
     answer: string;
-    label_en: string;
-    label_ar: string;
     count: number;
     percentage: number;
   }>;
