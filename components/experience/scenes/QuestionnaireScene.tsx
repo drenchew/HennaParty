@@ -17,10 +17,14 @@ export function QuestionnaireScene() {
   const [questionCount, setQuestionCount] = useState(0);
 
   const allAnswered =
-    questionCount > 0 && Object.keys(answers).length >= questionCount;
+    questionCount > 0 &&
+    Object.values(answers).filter((answer) => answer.trim()).length >= questionCount;
 
-  async function handleFinish() {
-    if (!allAnswered) return false;
+  async function handleAllComplete(votes: Record<number, string>) {
+    const complete =
+      questionCount > 0 &&
+      Object.values(votes).filter((answer) => answer.trim()).length >= questionCount;
+    if (!complete) return false;
     completeStep("questionnaire");
     refresh();
     nextStep();
@@ -36,7 +40,7 @@ export function QuestionnaireScene() {
         <ExperienceNav
           onBack={prevStep}
           continueLabel={t("questionnaire.finish")}
-          onContinue={handleFinish}
+          onContinue={() => handleAllComplete(answers)}
           continueDisabled={!allAnswered}
         />
       }
@@ -44,6 +48,7 @@ export function QuestionnaireScene() {
       <QuestionnaireVoting
         onVotesChange={setAnswers}
         onQuestionCountChange={setQuestionCount}
+        onAllComplete={handleAllComplete}
       />
     </SceneShell>
   );

@@ -15,6 +15,8 @@ import { LiveResults } from "./LiveResults";
 interface QuestionnaireVotingProps {
   onVotesChange?: (votes: Record<number, string>) => void;
   onQuestionCountChange?: (count: number) => void;
+  /** Called when the last question is saved and every question has an answer. */
+  onAllComplete?: (votes: Record<number, string>) => void | Promise<void | boolean>;
   showLiveResults?: boolean;
 }
 
@@ -22,9 +24,17 @@ function questionLabel(question: VoteQuestion, locale: "en" | "ar"): string {
   return locale === "ar" ? question.question_text_ar : question.question_text;
 }
 
+function isFullyAnswered(
+  votes: Record<number, string>,
+  questions: VoteQuestion[],
+): boolean {
+  return questions.length > 0 && questions.every((q) => Boolean(votes[q.id]?.trim()));
+}
+
 export function QuestionnaireVoting({
   onVotesChange,
   onQuestionCountChange,
+  onAllComplete,
   showLiveResults: showLiveResultsDefault = false,
 }: QuestionnaireVotingProps) {
   const { t, locale } = useLocale();
@@ -80,18 +90,26 @@ export function QuestionnaireVoting({
     setDraft(answers[currentQuestion.id] ?? "");
   }, [currentQuestion, answers]);
 
-  async function handleSave() {
-    if (!currentQuestion || saving) return;
+  const saveCurrentAnswer = useCallback(async (): Promise<{
+    ok: boolean;
+    votes?: Record<number, string>;
+  }> => {
+    if (!currentQuestion || saving) return { ok: false };
 
     const trimmed = draft.trim();
     if (!trimmed) {
       setError(t("questionnaireUi.emptyAnswer"));
-      return;
+      return { ok: false };
     }
 
     if (trimmed.length > OPEN_ANSWER_MAX_LENGTH) {
       setError(t("questionnaireUi.answerTooLong", { max: OPEN_ANSWER_MAX_LENGTH }));
-      return;
+      return { ok: false };
+    }
+
+    const saved = answers[currentQuestion.id]?.trim() ?? "";
+    if (trimmed === saved) {
+      return { ok: true, votes: answers };
     }
 
     setSaving(true);
@@ -101,18 +119,84 @@ export function QuestionnaireVoting({
     if (isApiError(response)) {
       setError(response.error);
       setSaving(false);
-      return;
+      return { ok: false };
     }
 
-    const next = { ...answers, [currentQuestion.id]: trimmed };
-    setAnswers(next);
-    onVotesChange?.(next);
+    const nextVotes = { ...answers, [currentQuestion.id]: trimmed };
+    setAnswers(nextVotes);
+    onVotesChange?.(nextVotes);
 
     if (showLiveResults) {
       await loadState(true);
     }
 
     setSaving(false);
+    return { ok: true, votes: nextVotes };
+  }, [
+    answers,
+    currentQuestion,
+    draft,
+    loadState,
+    onVotesChange,
+    saving,
+    showLiveResults,
+    t,
+  ]);
+
+  const advanceAfterSave = useCallback(
+    async (votes: Record<number, string>) => {
+      if (currentIndex < questions.length - 1) {
+        setCurrentIndex((index) => index + 1);
+        return;
+      }
+
+      if (isFullyAnswered(votes, questions)) {
+        await onAllComplete?.(votes);
+      }
+    },
+    [currentIndex, onAllComplete, questions],
+  );
+
+  async function handleSave() {
+    const result = await saveCurrentAnswer();
+    if (!result.ok || !result.votes) return;
+    await advanceAfterSave(result.votes);
+  }
+
+  async function handleNext() {
+    if (saving || !currentQuestion) return;
+
+    const trimmed = draft.trim();
+    const saved = answers[currentQuestion.id]?.trim() ?? "";
+
+    if (trimmed && trimmed !== saved) {
+      const result = await saveCurrentAnswer();
+      if (!result.ok || !result.votes) return;
+
+      if (currentIndex < questions.length - 1) {
+        setCurrentIndex((index) => index + 1);
+        return;
+      }
+
+      if (isFullyAnswered(result.votes, questions)) {
+        await onAllComplete?.(result.votes);
+      }
+      return;
+    }
+
+    if (!trimmed && !saved) {
+      setError(t("questionnaireUi.emptyAnswer"));
+      return;
+    }
+
+    if (currentIndex < questions.length - 1) {
+      setCurrentIndex((index) => index + 1);
+      return;
+    }
+
+    if (isFullyAnswered(answers, questions)) {
+      await onAllComplete?.(answers);
+    }
   }
 
   async function toggleLiveResults() {
@@ -126,6 +210,10 @@ export function QuestionnaireVoting({
   const answeredCount = Object.values(answers).filter((answer) => answer.trim()).length;
   const allAnswered = questionCount > 0 && answeredCount >= questionCount;
   const savedAnswer = currentQuestion ? answers[currentQuestion.id]?.trim() : "";
+  const hasUnsavedDraft =
+    Boolean(currentQuestion) &&
+    draft.trim().length > 0 &&
+    draft.trim() !== savedAnswer;
 
   if (loading) {
     return <p className="flow-loading">{t("questionnaireUi.loading")}</p>;
@@ -196,7 +284,9 @@ export function QuestionnaireVoting({
           {draft.trim().length}/{OPEN_ANSWER_MAX_LENGTH}
           {savedAnswer && draft.trim() === savedAnswer
             ? ` · ${t("questionnaireUi.saved")}`
-            : ""}
+            : hasUnsavedDraft
+              ? ` · ${t("questionnaireUi.unsaved")}`
+              : ""}
         </p>
 
         <button
@@ -213,7 +303,7 @@ export function QuestionnaireVoting({
         <button
           type="button"
           className="flow-btn flow-btn--secondary flow-btn--compact"
-          disabled={currentIndex <= 0}
+          disabled={currentIndex <= 0 || saving}
           onClick={() => setCurrentIndex((index) => Math.max(0, index - 1))}
         >
           {t("questionnaireUi.prevQuestion")}
@@ -221,12 +311,14 @@ export function QuestionnaireVoting({
         <button
           type="button"
           className="flow-btn flow-btn--secondary flow-btn--compact"
-          disabled={currentIndex >= questions.length - 1}
-          onClick={() =>
-            setCurrentIndex((index) => Math.min(questions.length - 1, index + 1))
-          }
+          disabled={saving}
+          onClick={() => void handleNext()}
         >
-          {t("questionnaireUi.nextQuestion")}
+          {saving
+            ? t("questionnaireUi.saving")
+            : currentIndex >= questions.length - 1
+              ? t("questionnaireUi.finishQuestions")
+              : t("questionnaireUi.nextQuestion")}
         </button>
       </div>
 

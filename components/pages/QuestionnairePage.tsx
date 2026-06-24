@@ -15,10 +15,14 @@ export function QuestionnairePage() {
   const [questionCount, setQuestionCount] = useState(0);
 
   const allAnswered =
-    questionCount > 0 && Object.keys(answers).length >= questionCount;
+    questionCount > 0 &&
+    Object.values(answers).filter((answer) => answer.trim()).length >= questionCount;
 
-  async function handleFinish(): Promise<boolean> {
-    if (!allAnswered) return false;
+  async function handleAllComplete(votes: Record<number, string>) {
+    const complete =
+      questionCount > 0 &&
+      Object.values(votes).filter((answer) => answer.trim()).length >= questionCount;
+    if (!complete) return false;
     completeStep("questionnaire");
     refresh();
     return true;
@@ -34,7 +38,7 @@ export function QuestionnairePage() {
           <FlowNav
             backHref={STEP_ROUTES.advice}
             nextLabel="See Thank You"
-            onNext={handleFinish}
+            onNext={() => handleAllComplete(answers)}
             nextHref={nextRoute("questionnaire")}
             nextDisabled={!allAnswered}
           />
@@ -43,6 +47,7 @@ export function QuestionnairePage() {
         <QuestionnaireVoting
           onVotesChange={setAnswers}
           onQuestionCountChange={setQuestionCount}
+          onAllComplete={handleAllComplete}
         />
       </FlowLayout>
     </StepGuard>
